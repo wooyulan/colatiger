@@ -27,11 +27,9 @@ func NewUserService(service *Service, userRepo repository.UserRepository) UserSe
 
 // Register 用户注册
 func (u userService) Register(ctx context.Context, req v1.Register) error {
-
 	if user, err := u.userRepo.FindByEmail(ctx, req.Email); err == nil && user != nil {
-		return v1.Errors.DataError
+		return errors.New("用户名已经存在")
 	}
-
 	primaryKey, err := u.sid.GenInt64()
 	if err != nil {
 		return errors.Wrap(err, "failed to generate user ID")
