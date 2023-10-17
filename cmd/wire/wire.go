@@ -9,6 +9,7 @@ import (
 	"colatiger/internal/server"
 	"colatiger/internal/service"
 	"colatiger/pkg/app"
+	"colatiger/pkg/helper/sid"
 	"colatiger/pkg/jwt"
 	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
@@ -51,6 +52,7 @@ func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
 		handlerSet,
 		serverSet,
 		jwt.NewJwt,
+		sid.NewSid,
 		newApp,
 	))
 }

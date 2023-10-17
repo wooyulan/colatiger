@@ -12,6 +12,7 @@ import (
 	"colatiger/internal/server"
 	"colatiger/internal/service"
 	"colatiger/pkg/app"
+	"colatiger/pkg/helper/sid"
 	"colatiger/pkg/jwt"
 	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
@@ -24,13 +25,16 @@ import (
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
 	jwtJWT := jwt.NewJwt(viperViper)
 	handlerHandler := handler.NewHandler(logger)
-	serviceService := service.NewService(logger)
+	sidSid := sid.NewSid()
+	serviceService := service.NewService(logger, sidSid, jwtJWT)
 	db := repository.NewDB(viperViper, logger)
 	client := repository.NewRedis(viperViper)
 	repositoryRepository := repository.NewRepository(logger, db, client)
+
 	userRepository := repository.NewUserRepository(repositoryRepository)
 	userService := service.NewUserService(serviceService, userRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
+
 	httpServer := server.NewHttpServer(logger, viperViper, jwtJWT, userHandler)
 	appApp := newApp(httpServer)
 	return appApp, func() {

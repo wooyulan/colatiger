@@ -8,12 +8,25 @@ import (
 	"time"
 )
 
-type JWT struct {
-	key []byte
+const (
+	TokenType    = "bearer"
+	AppGuardName = "app"
+)
+
+// 所有需要颁发 token 的用户模型必须实现这个接口
+type JwtUser interface {
+	GetUid() string
 }
 
+type JWT struct {
+	key                []byte
+	ttl                time.Time `mapstructure:"jwt_ttl" json:"ttl" yaml:"ttl"`                                                // token 有效期（秒）
+	refreshGracePeriod int64     `mapstructure:"refresh_grace_period" json:"refresh_grace_period" yaml:"refresh_grace_period"` // token 自动刷新宽限时间（秒）
+
+}
+
+// MyCustomClaims 自定义Claims
 type MyCustomClaims struct {
-	UserId int64
 	jwt.RegisteredClaims
 }
 
@@ -21,26 +34,30 @@ func NewJwt(conf *viper.Viper) *JWT {
 	return &JWT{key: []byte(conf.GetString("security.jwt.key"))}
 }
 
-func (j *JWT) GenToken(userId int64, expiresAt time.Time) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, MyCustomClaims{
-		UserId: userId,
+type TokenOutPut struct {
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+}
+
+func (j *JWT) GenToken(GuardName string, user JwtUser) (tokenData TokenOutPut, err error, token *jwt.Token) {
+
+	token = jwt.NewWithClaims(jwt.SigningMethodHS256, MyCustomClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(expiresAt),
+			ExpiresAt: jwt.NewNumericDate(j.ttl),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "",
-			Subject:   "",
-			ID:        "",
-			Audience:  []string{},
+			Issuer:    GuardName, // 用于在中间件中区分不同客户端颁发的 token，避免 token 跨端使用,
+			ID:        user.GetUid(),
 		},
 	})
 
 	// Sign and get the complete encoded token as a string using the key
 	tokenString, err := token.SignedString(j.key)
-	if err != nil {
-		return "", err
+	tokenData = TokenOutPut{
+		tokenString,
+		TokenType,
 	}
-	return tokenString, nil
+	return
 }
 
 func (j *JWT) ParseToken(tokenString string) (*MyCustomClaims, error) {

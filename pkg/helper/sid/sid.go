@@ -31,3 +31,12 @@ func (s Sid) GenUint64() (uint64, error) {
 	// 生成分布式ID
 	return s.sf.NextID()
 }
+
+func (s Sid) GenInt64() (int64, error) {
+	id, err := s.sf.NextID()
+	if err != nil {
+		return 0, err
+	}
+	return int64(id), nil
+
+}

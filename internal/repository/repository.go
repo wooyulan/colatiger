@@ -29,11 +29,11 @@ func NewRepository(logger *log.Logger, db *gorm.DB, rdb *redis.Client) *Reposito
 func NewDB(conf *viper.Viper, log *log.Logger) *gorm.DB {
 	logger := zapgorm2.New(log.Logger)
 	logger.SetAsDefault()
-	db, err := gorm.Open(mysql.Open(conf.GetString("data.mysql.user")), &gorm.Config{Logger: logger})
+	db, err := gorm.Open(mysql.Open(conf.GetString("data.mysql")), &gorm.Config{Logger: logger})
 	if err != nil {
 		panic(err)
 	}
-	db = db.Debug()
+	// db = db.Debug()
 	return db
 }
 

@@ -1,6 +1,7 @@
 package server
 
 import (
+	v1 "colatiger/api/v1"
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
 	"colatiger/pkg/jwt"
@@ -15,6 +16,12 @@ func NewHttpServer(logger *log.Logger,
 	jwt *jwt.JWT,
 	userHandler handler.UserHandler) *http.Server {
 
+	// 初始化验证器
+	middleware.InitializeValidator()
+
+	// 初始化表结构
+	middleware.InitializeDB(conf)
+
 	gin.SetMode(gin.ReleaseMode)
 
 	s := http.NewServer(
@@ -28,19 +35,16 @@ func NewHttpServer(logger *log.Logger,
 		middleware.CORSMiddleware(),
 		//middleware.ResponseLogMiddleware(logger),
 		//middleware.RequestLogMiddleware(logger),
-		//middleware.SignMiddleware(log),
 	)
-	//s.GET("/", func(ctx *gin.Context) {
-	//	logger.WithContext(ctx).Info("hello")
-	//	apiV1.HandleSuccess(ctx, map[string]interface{}{
-	//		":)": "Thank you for using nunu!",
-	//	})
-	//})
+	s.GET("/", func(ctx *gin.Context) {
+		logger.WithContext(ctx).Info("hello")
+		v1.Success(ctx, "welcome user colatiger")
+	})
 
 	v1 := s.Group("/api/v1")
 	noAuthRouter := v1
 	{
-		noAuthRouter.POST("/register", userHandler.Register)
+		noAuthRouter.POST("/auth/register", userHandler.Register)
 		//noAuthRouter.POST("/login", userHandler.Login)
 	}
 

@@ -9,10 +9,11 @@ security:
     app_security: 123456
   jwt:
     key: QQYnRFerJTSEcrfB89fw8prOaObmrch8
+    ttl: 43200
+    refresh_grace_period: 1800
 
 data:
-  mysql:
-    user: root:Abcd1234@tcp(127.0.0.1:3308)/cola_tiger?charset=utf8mb4&parseTime=True&loc=Local
+  mysql: root:Abcd1234@tcp(127.0.0.1:3308)/cola_tiger?charset=utf8mb4&parseTime=True&loc=Local
   redis:
     addr: 127.0.0.1:6379
     password: ""
