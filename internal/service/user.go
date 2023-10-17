@@ -10,7 +10,7 @@ import (
 )
 
 type UserService interface {
-	Register(ctx context.Context, register v1.Register) error
+	Register(ctx context.Context, reg v1.Register) error
 }
 
 type userService struct {
@@ -27,7 +27,11 @@ func NewUserService(service *Service, userRepo repository.UserRepository) UserSe
 
 // Register 用户注册
 func (u userService) Register(ctx context.Context, req v1.Register) error {
-	// Generate user ID
+
+	if user, err := u.userRepo.FindByEmail(ctx, req.Email); err == nil && user != nil {
+		return v1.Errors.DataError
+	}
+
 	primaryKey, err := u.sid.GenInt64()
 	if err != nil {
 		return errors.Wrap(err, "failed to generate user ID")
