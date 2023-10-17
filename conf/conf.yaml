@@ -1,4 +1,0 @@
-app:
-  env: 'local'
-  port: 6000
-  app_name: 'colatiger-app'
