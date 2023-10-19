@@ -47,17 +47,10 @@ func NewHttpServer(logger *log.Logger,
 	}
 
 	// Non-strict permission routing group
-	//noStrictAuthRouter := v1.Use(middleware.NoStrictAuth(jwt, logger))
-	//{
-	//	noStrictAuthRouter.GET("/user", userHandler.GetProfile)
-	//}
-	//
-	//// Strict permission routing group
-	//strictAuthRouter := v1.Use(middleware.StrictAuth(jwt, logger))
-	//{
-	//	strictAuthRouter.PUT("/user", userHandler.UpdateProfile)
-	//}
-
+	authRouter := v1.Use(middleware.NoStrictAuth(jwt))
+	{
+		authRouter.GET("/user/info", userHandler.GetInfo)
+	}
 	return s
 
 }

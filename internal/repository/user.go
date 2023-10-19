@@ -47,7 +47,7 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (*models
 // FindByID 根据id主键查询
 func (r *userRepository) FindByID(ctx context.Context, id string) (*models.User, error) {
 	var user models.User
-	if err := r.repo.db.Where("user_id = ?", id).First(&user).Error; err != nil {
+	if err := r.repo.db.Where("id = ?", id).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
