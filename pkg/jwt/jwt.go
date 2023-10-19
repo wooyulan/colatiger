@@ -40,7 +40,6 @@ type TokenOutPut struct {
 }
 
 func (j *JWT) GenToken(GuardName string, user JwtUser) (tokenData TokenOutPut, err error, token *jwt.Token) {
-
 	token = jwt.NewWithClaims(jwt.SigningMethodHS256, MyCustomClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(j.ttl),

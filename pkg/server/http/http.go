@@ -46,22 +46,22 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 
 	if err := s.httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		s.logger.Sugar().Fatalf("listen: %s\n", err)
+		s.logger.Fatalf("listen: %s\n", err)
 	}
 
 	return nil
 }
 func (s *Server) Stop(ctx context.Context) error {
-	s.logger.Sugar().Info("Shutting down wire...")
+	s.logger.Info("Shutting down wire...")
 
 	// The context is used to inform the wire it has 5 seconds to finish
 	// the request it is currently handling
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := s.httpSrv.Shutdown(ctx); err != nil {
-		s.logger.Sugar().Fatal("Server forced to shutdown: ", err)
+		s.logger.Fatal("Server forced to shutdown: ", err)
 	}
 
-	s.logger.Sugar().Info("Server exiting")
+	s.logger.Info("Server exiting")
 	return nil
 }

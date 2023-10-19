@@ -24,9 +24,9 @@ import (
 
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
 	jwtJWT := jwt.NewJwt(viperViper)
-	handlerHandler := handler.NewHandler(logger)
+	handlerHandler := handler.NewHandler(logger,jwtJWT)
 	sidSid := sid.NewSid()
-	serviceService := service.NewService(logger, sidSid, jwtJWT)
+	serviceService := service.NewService(logger, sidSid)
 	db := repository.NewDB(viperViper, logger)
 	client := repository.NewRedis(viperViper)
 	repositoryRepository := repository.NewRepository(logger, db, client)

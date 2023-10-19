@@ -1,6 +1,7 @@
-package v1
+package res
 
 import (
+	"colatiger/api/v1"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
@@ -8,7 +9,7 @@ import (
 
 // 响应结构体
 type Response struct {
-	Code    int         `json:"code"`    // 自定义错误码
+	Status  string      `json:"status"`  // 自定义错误码
 	Data    interface{} `json:"data"`    // 数据
 	Message string      `json:"message"` // 信息
 }
@@ -16,14 +17,14 @@ type Response struct {
 // Success 响应成功 ErrorCode 为 0 表示成功
 func Success(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, Response{
-		0,
+		"ok",
 		data,
 		"ok",
 	})
 }
 
 // Fail 响应失败 ErrorCode 不为 0 表示失败
-func Fail(c *gin.Context, errorCode int, msg string) {
+func Fail(c *gin.Context, errorCode string, msg string) {
 	c.JSON(http.StatusOK, Response{
 		errorCode,
 		nil,
@@ -32,22 +33,22 @@ func Fail(c *gin.Context, errorCode int, msg string) {
 }
 
 // FailByError 失败响应 返回自定义错误的错误码、错误信息
-func FailByError(c *gin.Context, error CustomError) {
+func FailByError(c *gin.Context, error v1.CustomError) {
 	Fail(c, error.ErrorCode, error.ErrorMsg)
 }
 
 // ValidateFail 请求参数验证失败
 func ValidateFail(c *gin.Context, msg string) {
-	Fail(c, Errors.ValidateError.ErrorCode, msg)
+	Fail(c, v1.Errors.ValidateError.ErrorCode, msg)
 }
 
 // BusinessFail 业务逻辑失败
 func BusinessFail(c *gin.Context, msg string) {
-	Fail(c, Errors.BusinessError.ErrorCode, msg)
+	Fail(c, v1.Errors.BusinessError.ErrorCode, msg)
 }
 
 func TokenFail(c *gin.Context) {
-	FailByError(c, Errors.TokenError)
+	FailByError(c, v1.Errors.TokenError)
 }
 
 func ServerError(c *gin.Context, err interface{}) {
@@ -59,7 +60,7 @@ func ServerError(c *gin.Context, err interface{}) {
 		}
 	}
 	c.JSON(http.StatusInternalServerError, Response{
-		http.StatusInternalServerError,
+		"fail",
 		nil,
 		msg,
 	})

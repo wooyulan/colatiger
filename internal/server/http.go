@@ -1,7 +1,7 @@
 package server
 
 import (
-	v1 "colatiger/api/v1"
+	v1 "colatiger/api/v1/res"
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
 	"colatiger/pkg/jwt"
@@ -33,8 +33,6 @@ func NewHttpServer(logger *log.Logger,
 
 	s.Use(
 		middleware.CORSMiddleware(),
-		//middleware.ResponseLogMiddleware(logger),
-		//middleware.RequestLogMiddleware(logger),
 	)
 	s.GET("/", func(ctx *gin.Context) {
 		logger.WithContext(ctx).Info("hello")
@@ -45,7 +43,7 @@ func NewHttpServer(logger *log.Logger,
 	noAuthRouter := v1
 	{
 		noAuthRouter.POST("/auth/register", userHandler.Register)
-		//noAuthRouter.POST("/login", userHandler.Login)
+		noAuthRouter.POST("/auth/login", userHandler.Login)
 	}
 
 	// Non-strict permission routing group

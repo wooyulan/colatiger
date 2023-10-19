@@ -2,12 +2,15 @@ package handler
 
 import (
 	v1 "colatiger/api/v1"
+	"colatiger/api/v1/res"
 	"colatiger/internal/service"
+	"colatiger/pkg/jwt"
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler interface {
 	Register(ctx *gin.Context)
+	Login(ctx *gin.Context)
 }
 
 func NewUserHandler(handler *Handler, userService service.UserService) UserHandler {
@@ -25,13 +28,32 @@ type userHandler struct {
 func (u userHandler) Register(ctx *gin.Context) {
 	var form v1.Register
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		v1.ValidateFail(ctx, v1.GetErrorMsg(form, err))
+		res.ValidateFail(ctx, v1.GetErrorMsg(form, err))
 		return
 	}
 
 	if err := u.userService.Register(ctx, form); err != nil {
-		v1.BusinessFail(ctx, err.Error())
+		res.BusinessFail(ctx, err.Error())
 	} else {
-		v1.Success(ctx, nil)
+		res.Success(ctx, nil)
+	}
+}
+
+func (u userHandler) Login(ctx *gin.Context) {
+	var form v1.Login
+	if err := ctx.ShouldBindJSON(&form); err != nil {
+		res.ValidateFail(ctx, v1.GetErrorMsg(form, err))
+		return
+	}
+
+	if user, err := u.userService.Login(ctx, form); err != nil {
+		res.BusinessFail(ctx, err.Error())
+	} else {
+		tokenData, err, _ := u.jwt.GenToken(jwt.AppGuardName, user)
+		if err != nil {
+			res.BusinessFail(ctx, err.Error())
+			return
+		}
+		res.Success(ctx, tokenData)
 	}
 }
