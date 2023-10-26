@@ -14,7 +14,9 @@ import (
 func NewHttpServer(logger *log.Logger,
 	conf *viper.Viper,
 	jwt *jwt.JWT,
-	userHandler handler.UserHandler) *http.Server {
+	userHandler handler.UserHandler,
+	chatHandler handler.ChatHandler,
+) *http.Server {
 
 	// 初始化验证器
 	middleware.InitializeValidator()
@@ -31,13 +33,15 @@ func NewHttpServer(logger *log.Logger,
 		http.WithServerPort(conf.GetInt("http.port")),
 	)
 
-	s.Use(
-		middleware.CORSMiddleware(),
-	)
+	//s.Use(
+	//	middleware.CORSMiddleware(),
+	//)
 	s.GET("/", func(ctx *gin.Context) {
 		logger.WithContext(ctx).Info("hello")
 		v1.Success(ctx, "welcome user colatiger")
 	})
+
+	s.POST("/chat", chatHandler.ChatStream)
 
 	v1 := s.Group("/api/v1")
 	noAuthRouter := v1

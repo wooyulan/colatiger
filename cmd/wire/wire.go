@@ -20,6 +20,7 @@ import (
 var handlerSet = wire.NewSet(
 	handler.NewHandler,
 	handler.NewUserHandler,
+	handler.NewChatHandler,
 )
 
 var serviceSet = wire.NewSet(
