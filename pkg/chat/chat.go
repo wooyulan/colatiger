@@ -69,8 +69,8 @@ func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) {
 		if m.ErrorCode == 0 {
 			text := strings.Split(m.Text, llavaReq.Prompt)[1]
 			llavaReq.Prompt = llavaReq.Prompt + text
-			text = "\"" + text + "\""
-			var data = "data: " + text + "\n\n"
+			textTemp, _ := json.Marshal(text)
+			var data = "data: " + string(textTemp) + "\n\n"
 			fmt.Fprintf(ctx.Writer, data)
 			ctx.Writer.Flush()
 		}
