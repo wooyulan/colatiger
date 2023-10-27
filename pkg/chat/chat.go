@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	v1 "colatiger/api/v1"
+	"colatiger/pkg/helper/img"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -68,8 +69,8 @@ func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) {
 		if m.ErrorCode == 0 {
 			text := strings.Split(m.Text, llavaReq.Prompt)[1]
 			llavaReq.Prompt = llavaReq.Prompt + text
-			data := "data: " + text + "\n\n"
-			data = strings.Replace(data, "\n", "\r\n", -1)
+			text = "\"" + text + "\""
+			var data = "data: " + text + "\n\n"
 			fmt.Fprintf(ctx.Writer, data)
 			ctx.Writer.Flush()
 		}
@@ -90,8 +91,8 @@ func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq) {
 	if chatReq.Images != nil && len(chatReq.Images) > 0 {
 		baseImg := make([]string, len(chatReq.Images))
 		// base64 图片
-		for i, img := range chatReq.Images {
-			base64, _ := img.GetUrlImgBase64(img)
+		for i, imgUrl := range chatReq.Images {
+			base64, _ := img.GetUrlImgBase64(imgUrl)
 			baseImg[i] = base64
 		}
 		body.Images = baseImg

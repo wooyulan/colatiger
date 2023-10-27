@@ -15,7 +15,7 @@ func CORSMiddleware() gin.HandlerFunc {
 			//服务器支持的所有跨域请求的方法
 			ctx.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE,UPDATE")
 			//允许跨域设置可以返回其他子段，可以自定义字段
-			ctx.Header("Access-Control-Allow-Headers", "Authorization, content-type, Content-Length, X-CSRF-Token, Token, session, Access-Control-Allow-Headers, account")
+			ctx.Header("Access-Control-Allow-Headers", "x-requested-with ,Authorization, content-type, Content-Length, X-CSRF-Token, Token, session, Access-Control-Allow-Headers, account")
 			// 允许浏览器（客户端）可以解析的头部
 			ctx.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")
 			//设置缓存时间
