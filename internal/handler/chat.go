@@ -1,6 +1,8 @@
 package handler
 
 import (
+	v1 "colatiger/api/v1"
+	"colatiger/api/v1/res"
 	"colatiger/pkg/chat"
 	"github.com/gin-gonic/gin"
 )
@@ -19,16 +21,14 @@ type chatHandler struct {
 	*Handler
 }
 
-// 对话接口
+// 对话接口流
 func (c chatHandler) ChatStream(ctx *gin.Context) {
-
-	ctx.Header("Cache-Control", "no-cache")
-	ctx.Header("Connection", "keep-alive")
-	ctx.Header("Access-Control-Allow-Origin", "*")
-	ctx.Header("Content-Type", "text/event-stream; charset=utf-8")
-
-	chat.SendMsg(ctx)
-
+	var form v1.ChatReq
+	if err := ctx.ShouldBindJSON(&form); err != nil {
+		res.ValidateFail(ctx, v1.GetErrorMsg(form, err))
+		return
+	}
+	chat.BuildLLaVaModelBody(ctx, form)
 	ctx.Writer.WriteString("data: [DONE]\n\n")
 
 }

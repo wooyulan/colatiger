@@ -25,7 +25,6 @@ func NewHttpServer(logger *log.Logger,
 	middleware.InitializeDB(conf)
 
 	gin.SetMode(gin.ReleaseMode)
-
 	s := http.NewServer(
 		gin.Default(),
 		logger,
@@ -33,15 +32,13 @@ func NewHttpServer(logger *log.Logger,
 		http.WithServerPort(conf.GetInt("http.port")),
 	)
 
-	//s.Use(
-	//	middleware.CORSMiddleware(),
-	//)
+	s.Use(
+		middleware.CORSMiddleware(),
+	)
 	s.GET("/", func(ctx *gin.Context) {
 		logger.WithContext(ctx).Info("hello")
 		v1.Success(ctx, "welcome user colatiger")
 	})
-
-	s.POST("/chat", chatHandler.ChatStream)
 
 	v1 := s.Group("/api/v1")
 	noAuthRouter := v1
@@ -55,6 +52,12 @@ func NewHttpServer(logger *log.Logger,
 	{
 		authRouter.GET("/user/info", userHandler.GetInfo)
 	}
+
+	chatRouter := v1
+	{
+		chatRouter.POST("/chat/stream", middleware.HeadersMiddleware(), chatHandler.ChatStream)
+	}
+
 	return s
 
 }

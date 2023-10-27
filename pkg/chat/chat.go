@@ -1,8 +1,12 @@
 package chat
 
 import (
+	"bufio"
 	"bytes"
+	v1 "colatiger/api/v1"
+	"colatiger/pkg/helper/img_base"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"log"
@@ -10,7 +14,7 @@ import (
 	"strings"
 )
 
-type ChatReq struct {
+type LLaVaChatReq struct {
 	Model        string   `json:"model"`
 	Prompt       string   `json:"prompt"`
 	MaxNewTokens int      `json:"max_new_tokens"`
@@ -19,36 +23,21 @@ type ChatReq struct {
 	Images       []string `json:"images"`
 }
 
-type Message struct {
+type MessageResponse struct {
 	Text      string `json:"text"`
 	ErrorCode int    `json:"error_code"`
 }
 
-func SendMsg(ctx *gin.Context) {
-	// func main() {
+func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) {
 
-	body := ChatReq{
-		Model:        "llava-v1.5-13b",
-		Prompt:       "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions. USER: 你好,推荐几本中国历史书籍 ASSISTANT:",
-		MaxNewTokens: 512,
-		Temperature:  0.7,
-		Stop:         "</s>",
-		Images:       []string{},
-	}
-
-	jsonBytes, err := json.Marshal(body)
+	jsonBytes, err := json.Marshal(llavaReq)
 	if err != nil {
-		// handle error
 	}
 	//
 	req, err := http.NewRequest("POST", "http://82.156.138.158:10000/worker_generate_stream", bytes.NewBuffer(jsonBytes))
 	if err != nil {
 		println(err)
 	}
-	req.Header.Set("Content-Type", "text/event-stream; charset=UTF-8")
-	req.Header.Set("User-Agent", "LLaVA Client")
-	req.Header.Set("Accept", "application/json; charset=UTF-8")
-	req.Header.Set("Stream", "True")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -57,29 +46,60 @@ func SendMsg(ctx *gin.Context) {
 	}
 	defer resp.Body.Close()
 
-	buf := make([]byte, 14096)
-
 	for {
-		n, err := resp.Body.Read(buf)
-		if err != nil || n == 0 {
+		reader := bufio.NewReader(resp.Body)
+		rawLine, readErr := reader.ReadBytes(0)
+		if readErr != nil {
 			break
 		}
-		jsonStream := string(buf[:n])
+		noSpaceLine := bytes.TrimSpace(rawLine)
+		// 删除最后一个分隔符
+		noZeroLine := noSpaceLine[0 : len(noSpaceLine)-1]
+
+		jsonStream := string(noZeroLine)
 		dec := json.NewDecoder(strings.NewReader(jsonStream))
-		var m Message
+		var m MessageResponse
 		if err := dec.Decode(&m); err == io.EOF {
 			break
 		} else if err != nil {
 			log.Fatal(err)
+			break
 		}
 
 		if m.ErrorCode == 0 {
-			text := strings.Split(m.Text, body.Prompt)[1]
-			body.Prompt = body.Prompt + text
+			text := strings.Split(m.Text, llavaReq.Prompt)[1]
+			llavaReq.Prompt = llavaReq.Prompt + text
 			data := "data: " + text + "\n\n"
-			ctx.Writer.WriteString(data)
+			data = strings.Replace(data, "\n", "\r\n", -1)
+			fmt.Fprintf(ctx.Writer, data)
 			ctx.Writer.Flush()
 		}
 	}
+}
 
+func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq) {
+	prompt := "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions. USER: %s ASSISTANT:"
+	body := LLaVaChatReq{
+		Model:        "llava-v1.5-13b",
+		Prompt:       prompt,
+		MaxNewTokens: 512,
+		Temperature:  0.7,
+		Stop:         "</s>",
+		Images:       []string{},
+	}
+
+	if chatReq.Images != nil && len(chatReq.Images) > 0 {
+		baseImg := make([]string, len(chatReq.Images))
+		// base64 图片
+		for i, img := range chatReq.Images {
+			base64, _ := img_base.GetUrlImgBase64(img)
+			baseImg[i] = base64
+		}
+		body.Images = baseImg
+		body.Prompt = fmt.Sprintf(prompt, "<image>\\n"+chatReq.Message)
+	} else {
+		body.Prompt = fmt.Sprintf(prompt, chatReq.Message)
+	}
+
+	SendMsg(ctx, body)
 }
