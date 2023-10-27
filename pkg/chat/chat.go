@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	v1 "colatiger/api/v1"
-	"colatiger/pkg/helper/img_base"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -92,7 +91,7 @@ func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq) {
 		baseImg := make([]string, len(chatReq.Images))
 		// base64 图片
 		for i, img := range chatReq.Images {
-			base64, _ := img_base.GetUrlImgBase64(img)
+			base64, _ := img.GetUrlImgBase64(img)
 			baseImg[i] = base64
 		}
 		body.Images = baseImg

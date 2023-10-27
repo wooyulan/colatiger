@@ -16,6 +16,7 @@ func NewHttpServer(logger *log.Logger,
 	jwt *jwt.JWT,
 	userHandler handler.UserHandler,
 	chatHandler handler.ChatHandler,
+	ocrHandler handler.OcrHandler,
 ) *http.Server {
 
 	// 初始化验证器
@@ -53,9 +54,16 @@ func NewHttpServer(logger *log.Logger,
 		authRouter.GET("/user/info", userHandler.GetInfo)
 	}
 
+	// 对话
 	chatRouter := v1
 	{
 		chatRouter.POST("/chat/stream", middleware.HeadersMiddleware(), chatHandler.ChatStream)
+	}
+
+	// ocr
+	ocrRouter := v1
+	{
+		ocrRouter.POST("/ocr/info", ocrHandler.OcrImageInfo)
 	}
 
 	return s

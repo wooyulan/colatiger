@@ -34,7 +34,8 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 	userService := service.NewUserService(serviceService, userRepository)
 	userHandler := handler.NewUserHandler(handlerHandler, userService)
 	chatHandler := handler.NewChatHandler(handlerHandler)
-	httpServer := server.NewHttpServer(logger, viperViper, jwtJWT, userHandler, chatHandler)
+	ocrHandler := handler.NewOcrHandler(handlerHandler)
+	httpServer := server.NewHttpServer(logger, viperViper, jwtJWT, userHandler, chatHandler, ocrHandler)
 	appApp := newApp(httpServer)
 	return appApp, func() {
 	}, nil
@@ -42,7 +43,7 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), err
 
 // wire.go:
 
-var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewChatHandler)
+var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewChatHandler, handler.NewOcrHandler)
 
 var serviceSet = wire.NewSet(service.NewService, service.NewUserService)
 

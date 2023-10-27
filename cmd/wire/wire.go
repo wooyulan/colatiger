@@ -21,6 +21,7 @@ var handlerSet = wire.NewSet(
 	handler.NewHandler,
 	handler.NewUserHandler,
 	handler.NewChatHandler,
+	handler.NewOcrHandler,
 )
 
 var serviceSet = wire.NewSet(

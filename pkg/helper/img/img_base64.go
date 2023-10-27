@@ -1,4 +1,4 @@
-package img_base
+package img
 
 import (
 	"encoding/base64"
