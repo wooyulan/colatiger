@@ -4,30 +4,33 @@ import (
 	v1 "colatiger/api/v1"
 	"colatiger/api/v1/res"
 	"colatiger/internal/service"
+	"colatiger/pkg/jwt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"strconv"
 	"time"
 )
 
-type UserHandler interface {
+type IUserHandler interface {
 	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	GetInfo(ctx *gin.Context)
 }
 
-func NewUserHandler(handler *Handler, userService service.UserService) UserHandler {
-	return &userHandler{
-		Handler:     handler,
+type UserHandler struct {
+	log         *zap.Logger
+	jwt         *jwt.JWT
+	userService *service.UserService
+}
+
+func NewUserHandler(log *zap.Logger, userService *service.UserService) *UserHandler {
+	return &UserHandler{
+		log:         log,
 		userService: userService,
 	}
 }
 
-type userHandler struct {
-	*Handler
-	userService service.UserService
-}
-
-func (u userHandler) Register(ctx *gin.Context) {
+func (u *UserHandler) Register(ctx *gin.Context) {
 	var form v1.Register
 	if err := ctx.ShouldBindJSON(&form); err != nil {
 		res.ValidateFail(ctx, v1.GetErrorMsg(form, err))
@@ -35,13 +38,13 @@ func (u userHandler) Register(ctx *gin.Context) {
 	}
 
 	if err := u.userService.Register(ctx, form); err != nil {
-		res.BusinessFail(ctx, err.Error())
+		res.BusinessFail(ctx, "")
 	} else {
 		res.Success(ctx, nil)
 	}
 }
 
-func (u userHandler) Login(ctx *gin.Context) {
+func (u *UserHandler) Login(ctx *gin.Context) {
 	var form v1.Login
 	if err := ctx.ShouldBindJSON(&form); err != nil {
 		res.ValidateFail(ctx, v1.GetErrorMsg(form, err))
@@ -60,7 +63,7 @@ func (u userHandler) Login(ctx *gin.Context) {
 	}
 }
 
-func (u userHandler) GetInfo(ctx *gin.Context) {
+func (u *UserHandler) GetInfo(ctx *gin.Context) {
 	userId := GetUserIdFromCtx(ctx)
 	if userId == "" {
 		res.TokenFail(ctx)

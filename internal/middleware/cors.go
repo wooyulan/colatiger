@@ -5,7 +5,14 @@ import (
 	"net/http"
 )
 
-func CORSMiddleware() gin.HandlerFunc {
+type Cors struct {
+}
+
+func NewCors() *Cors {
+	return &Cors{}
+}
+
+func (m *Cors) CORSMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		method := ctx.Request.Method
 		origin := ctx.Request.Header.Get("Origin")

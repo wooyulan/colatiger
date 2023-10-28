@@ -62,3 +62,6 @@ func NewRedis(conf *viper.Viper) *redis.Client {
 
 	return rdb
 }
+
+func NewMinio(conf *viper.Viper, log *log.Logger) {
+}

@@ -4,11 +4,8 @@
 package wire
 
 import (
-	"colatiger/internal/handler"
-	"colatiger/internal/repository"
+	"colatiger/cmd"
 	"colatiger/internal/server"
-	"colatiger/internal/service"
-	"colatiger/pkg/app"
 	"colatiger/pkg/helper/sid"
 	"colatiger/pkg/jwt"
 	"colatiger/pkg/log"
@@ -17,41 +14,22 @@ import (
 	"github.com/spf13/viper"
 )
 
-var handlerSet = wire.NewSet(
-	handler.NewHandler,
-	handler.NewUserHandler,
-	handler.NewChatHandler,
-	handler.NewOcrHandler,
-)
-
-var serviceSet = wire.NewSet(
-	service.NewService,
-	service.NewUserService,
-)
-
-var repositorySet = wire.NewSet(
-	repository.NewDB,
-	repository.NewRedis,
-	repository.NewRepository,
-	repository.NewUserRepository,
-)
-var serverSet = wire.NewSet(
-	server.NewHttpServer,
-)
+var serverSet = wire.NewSet(server.NewHttpServer)
 
 // build App
-func newApp(httpServer *http.Server) *app.App {
-	return app.NewApp(
-		app.WithServer(httpServer),
-		app.WithName("cola-tiger-server"),
+func newApp(httpServer *http.Server) *main.App {
+	return main.NewApp(
+		main.WithServer(httpServer),
+		main.WithName("cola-tiger-server"),
 	)
 }
 
-func NewWire(*viper.Viper, *log.Logger) (*app.App, func(), error) {
+func NewWire(*viper.Viper, *log.Logger) (*main.App, func(), error) {
 	panic(wire.Build(
-		repositorySet,
-		serviceSet,
-		handlerSet,
+		//repository.ProviderSet,
+		//service.Providerset,
+		//handler.ProviderSet,
+		//server.ProviderSet,
 		serverSet,
 		jwt.NewJwt,
 		sid.NewSid,

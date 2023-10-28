@@ -21,3 +21,18 @@ data:
     read_timeout: 0.2s
     write_timeout: 0.2s
 
+
+minio:
+  endpoint: 127.0.0.1:9000
+  accessKeyID: colatiger
+  secretAccessKey: colatiger
+
+
+log:
+  level: 'info'
+  root_dir: 'storage/logs'
+  filename: 'app.log'
+  max_backups: 3
+  max_size: 500
+  max_age: 28
+  compress: true

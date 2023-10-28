@@ -13,10 +13,11 @@ import (
 
 func NewHttpServer(logger *log.Logger,
 	conf *viper.Viper,
+	recovery *middleware.Recovery,
+	cors *middleware.Cors,
 	jwt *jwt.JWT,
-	userHandler handler.UserHandler,
-	chatHandler handler.ChatHandler,
-	ocrHandler handler.OcrHandler,
+	userHandler *handler.UserHandler,
+	chatHandler *handler.ChatHandler,
 ) *http.Server {
 
 	// 初始化验证器
@@ -33,11 +34,16 @@ func NewHttpServer(logger *log.Logger,
 		http.WithServerPort(conf.GetInt("http.port")),
 	)
 
-	s.Use(
-		middleware.CORSMiddleware(),
-	)
+	if conf.GetString("app.env") == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	s.Use(gin.Logger(), recovery.Handler())
+
+	//跨域处理
+	s.Use(cors.CORSMiddleware())
+
 	s.GET("/", func(ctx *gin.Context) {
-		logger.WithContext(ctx).Info("hello")
 		v1.Success(ctx, "welcome user colatiger")
 	})
 
@@ -58,12 +64,6 @@ func NewHttpServer(logger *log.Logger,
 	chatRouter := v1
 	{
 		chatRouter.POST("/chat/stream", middleware.HeadersMiddleware(), chatHandler.ChatStream)
-	}
-
-	// ocr
-	ocrRouter := v1
-	{
-		ocrRouter.POST("/ocr/info", ocrHandler.OcrImageInfo)
 	}
 
 	return s

@@ -1,8 +1,9 @@
-package app
+package main
 
 import (
 	"colatiger/pkg/server"
 	"context"
+	"go.uber.org/zap"
 	"log"
 	"os"
 	"os/signal"
@@ -11,6 +12,7 @@ import (
 
 type App struct {
 	name    string
+	logger  *zap.Logger
 	servers []server.Server
 }
 
