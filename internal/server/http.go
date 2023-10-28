@@ -6,12 +6,12 @@ import (
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
 	"colatiger/internal/model"
-	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-func NewHttpServer(logger *log.Logger,
+func NewHttpServer(logger *zap.Logger,
 	conf *config.Configuration,
 	cors *middleware.Cors,
 	jwtAuth *middleware.JWTAuth,
@@ -21,7 +21,7 @@ func NewHttpServer(logger *log.Logger,
 
 	// 初始化验证器
 	middleware.InitializeValidator()
-	
+
 	s := http.NewServer(
 		gin.Default(),
 		logger,

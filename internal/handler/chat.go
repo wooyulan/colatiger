@@ -4,18 +4,18 @@ import (
 	"colatiger/api/response"
 	"colatiger/api/v1"
 	"colatiger/pkg/chat"
-	"colatiger/pkg/log"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-func NewChatHandler(log *log.Logger) *ChatHandler {
+func NewChatHandler(log *zap.Logger) *ChatHandler {
 	return &ChatHandler{
 		log: log,
 	}
 }
 
 type ChatHandler struct {
-	log *log.Logger
+	log *zap.Logger
 }
 
 // 对话接口流

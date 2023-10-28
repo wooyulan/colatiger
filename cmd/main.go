@@ -2,7 +2,7 @@ package main
 
 import (
 	"colatiger/cmd/wire"
-	"colatiger/pkg/config"
+	"colatiger/pkg/conf"
 	"colatiger/pkg/log"
 	"context"
 	"flag"
@@ -13,13 +13,10 @@ func main() {
 	var envConf = flag.String("conf", "./conf/local.yaml", "conf path, eg: -conf ./conf/local.yaml")
 	flag.Parse()
 
-	conf := config.InitConf(*envConf)
+	configGlobal := conf.NewConfig(*envConf)
+	logger := log.NewLog(configGlobal)
 
-	//	conf := config.NewConfig(*envConf)
-
-	logger := log.NewLog(conf)
-
-	app, cleanup, err := wire.NewWire(conf, logger)
+	app, cleanup, err := wire.NewWire(configGlobal, logger)
 	defer cleanup()
 	if err != nil {
 		panic(err)

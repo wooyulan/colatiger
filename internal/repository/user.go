@@ -3,18 +3,18 @@ package repository
 import (
 	"colatiger/internal/model"
 	"colatiger/internal/service"
-	"colatiger/pkg/log"
 	"context"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
 type userRepository struct {
 	repo *Repository
-	log  *log.Logger
+	log  *zap.Logger
 }
 
-func NewUserRepository(log *log.Logger, repo *Repository) service.UserRepo {
+func NewUserRepository(log *zap.Logger, repo *Repository) service.UserRepo {
 	return &userRepository{
 		log:  log,
 		repo: repo,

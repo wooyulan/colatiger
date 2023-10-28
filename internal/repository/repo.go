@@ -8,4 +8,5 @@ var ProviderSet = wire.NewSet(
 	NewRepository,
 	NewUserRepository,
 	NewJwtRepo,
+	NewTransaction,
 )

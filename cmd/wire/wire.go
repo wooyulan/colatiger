@@ -11,10 +11,9 @@ import (
 	"colatiger/internal/server"
 	"colatiger/internal/service"
 	"colatiger/pkg/common"
-	"colatiger/pkg/helper/sid"
-	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
 	"github.com/google/wire"
+	"go.uber.org/zap"
 )
 
 var serverSet = wire.NewSet(server.NewHttpServer)
@@ -27,7 +26,7 @@ func newApp(httpServer *http.Server) *server.App {
 	)
 }
 
-func NewWire(*config.Configuration, *log.Logger) (*server.App, func(), error) {
+func NewWire(*config.Configuration, *zap.Logger) (*server.App, func(), error) {
 	panic(wire.Build(
 		repository.ProviderSet,
 		service.ProviderSet,
@@ -35,7 +34,6 @@ func NewWire(*config.Configuration, *log.Logger) (*server.App, func(), error) {
 		middleware.ProviderSet,
 		common.ProviderSet,
 		serverSet,
-		sid.NewSid,
 		newApp,
 	))
 }

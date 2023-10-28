@@ -5,23 +5,23 @@ import (
 	"colatiger/config"
 	"colatiger/internal/model"
 	"colatiger/pkg/common"
-	"colatiger/pkg/log"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"go.uber.org/zap"
 	"time"
 )
 
 type JwtService struct {
 	conf        *config.Configuration
-	log         *log.Logger
+	log         *zap.Logger
 	uS          *UserService
 	lockBuilder *common.LockBuilder
 	jRepo       JwtRepo
 }
 
-func NewJwtService(conf *config.Configuration, log *log.Logger, uS *UserService, lockBuilder *common.LockBuilder, jRepo JwtRepo) *JwtService {
+func NewJwtService(conf *config.Configuration, log *zap.Logger, uS *UserService, lockBuilder *common.LockBuilder, jRepo JwtRepo) *JwtService {
 	return &JwtService{
 		conf:        conf,
 		log:         log,

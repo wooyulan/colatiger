@@ -1,4 +1,4 @@
-package config
+package conf
 
 import (
 	"colatiger/config"
@@ -26,15 +26,18 @@ import (
 //	return conf
 //}
 
-func InitConf(configPath string) *config.Configuration {
+func NewConfig(path string) *config.Configuration {
+	return initConf(path)
+}
 
-	fmt.Println("load config:" + configPath)
+func initConf(configPath string) *config.Configuration {
+	fmt.Println("load conf:" + configPath)
 
 	v := viper.New()
 	v.SetConfigFile(configPath)
 	v.SetConfigType("yaml")
 	if err := v.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("read config failed: %s \n", err))
+		panic(fmt.Errorf("read conf failed: %s \n", err))
 	}
 
 	var conf *config.Configuration
@@ -45,7 +48,7 @@ func InitConf(configPath string) *config.Configuration {
 
 	v.WatchConfig()
 	v.OnConfigChange(func(in fsnotify.Event) {
-		fmt.Println("config file changed:", in.Name)
+		fmt.Println("conf file changed:", in.Name)
 		defer func() {
 			if err := recover(); err != nil {
 				fmt.Println(err)

@@ -3,7 +3,7 @@ package model
 import "strconv"
 
 type User struct {
-	Id       int64  `json:"id" gorm:"primaryKey"`
+	Id       uint64 `json:"id" gorm:"primaryKey"`
 	Mobile   string `json:"mobile" gorm:"comment:用户手机号"`
 	Nickname string `json:"nickname" gorm:"comment:用户昵称"`
 	Avatar   string `json:"avatar" gorm:"comment:用户头像"`

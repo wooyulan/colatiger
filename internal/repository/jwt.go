@@ -3,18 +3,18 @@ package repository
 import (
 	"colatiger/internal/service"
 	"colatiger/pkg/helper/hash"
-	"colatiger/pkg/log"
 	"context"
+	"go.uber.org/zap"
 	"strconv"
 	"time"
 )
 
 type jwtRepo struct {
 	data *Repository
-	log  *log.Logger
+	log  *zap.Logger
 }
 
-func NewJwtRepo(data *Repository, log *log.Logger) service.JwtRepo {
+func NewJwtRepo(data *Repository, log *zap.Logger) service.JwtRepo {
 	return &jwtRepo{
 		data: data,
 		log:  log,

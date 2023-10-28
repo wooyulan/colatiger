@@ -3,24 +3,18 @@ package repository
 import (
 	"colatiger/config"
 	"colatiger/internal/model"
-	"colatiger/pkg/helper/path"
 	"context"
 	"fmt"
 	"github.com/jassue/gin-wire/app/service"
 	"github.com/redis/go-redis/v9"
 	"github.com/sony/sonyflake"
 	"go.uber.org/zap"
-	"gopkg.in/natefinch/lumberjack.v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
-	"time"
 )
 
 type Repository struct {
@@ -44,52 +38,6 @@ func NewDB(conf *config.Configuration, gLog *zap.Logger) *gorm.DB {
 	if conf.Database.Driver != "mysql" {
 		panic(conf.Database.Driver + " driver is not supported")
 	}
-
-	var writer io.Writer
-	var logMode logger.LogLevel
-
-	// 是否启用日志文件
-	if conf.Database.EnableFileLogWriter {
-		logFileDir := conf.Log.RootDir
-		if !filepath.IsAbs(logFileDir) {
-			logFileDir = filepath.Join(path.RootPath(), logFileDir)
-		}
-		// 自定义 Writer
-		writer = &lumberjack.Logger{
-			Filename:   filepath.Join(logFileDir, conf.Database.LogFilename),
-			MaxSize:    conf.Log.MaxSize,
-			MaxBackups: conf.Log.MaxBackups,
-			MaxAge:     conf.Log.MaxAge,
-			Compress:   conf.Log.Compress,
-		}
-	} else {
-		// 默认 Writer
-		writer = os.Stdout
-	}
-
-	switch conf.Database.LogMode {
-	case "silent":
-		logMode = logger.Silent
-	case "error":
-		logMode = logger.Error
-	case "warn":
-		logMode = logger.Warn
-	case "info":
-		logMode = logger.Info
-	default:
-		logMode = logger.Info
-	}
-
-	newLogger := logger.New(
-		log.New(writer, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-			SlowThreshold:             time.Second,                        // 慢查询 SQL 阈值
-			Colorful:                  !conf.Database.EnableFileLogWriter, // 禁用彩色打印
-			IgnoreRecordNotFoundError: false,                              // 忽略ErrRecordNotFound（记录未找到）错误
-			LogLevel:                  logMode,                            // Log lever
-		},
-	)
-
 	dsn := fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Local",
 		conf.Database.UserName,
@@ -103,18 +51,15 @@ func NewDB(conf *config.Configuration, gLog *zap.Logger) *gorm.DB {
 		NamingStrategy: schema.NamingStrategy{
 			TablePrefix: conf.Database.TablePrefix,
 			//SingularTable: true,
-
 		},
-		DisableForeignKeyConstraintWhenMigrating: true,      // 禁用自动创建外键约束
-		Logger:                                   newLogger, // 使用自定义 Logger
+		DisableForeignKeyConstraintWhenMigrating: true, // 禁用自动创建外键约束
 	}); err != nil {
-		gLog.Error("failed opening connection to err:", zap.Any("err", err))
+		gLog.Fatal("failed opening connection to err:", zap.Any("err", err))
 		panic("failed to connect database")
 	} else {
 		sqlDB, _ := db.DB()
 		sqlDB.SetMaxIdleConns(conf.Database.MaxIdleConns)
 		sqlDB.SetMaxOpenConns(conf.Database.MaxOpenConns)
-
 		// 初始化数据库
 		initMySqlTables(db)
 		return db
@@ -129,7 +74,7 @@ func NewRedis(c *config.Configuration, gLog *zap.Logger) *redis.Client {
 	})
 	//client.AddHook(redisotel.TracingHook{})
 	if err := client.Ping(context.Background()).Err(); err != nil {
-		gLog.Error("redis connect failed, err:", zap.Any("err", err))
+		gLog.Fatal("redis connect failed, err:", zap.Any("err", err))
 		panic("failed to connect redis")
 	}
 

@@ -11,15 +11,15 @@ import (
 	"time"
 )
 
-type Logger struct {
-	*zap.Logger
-}
+//type Logger struct {
+//	*zap.Logger
+//}
+//
+//func NewLog(conf *config.Configuration) *Logger {
+//	return initZap(conf)
+//}
 
-func NewLog(conf *config.Configuration) *Logger {
-	return initZap(conf)
-}
-
-func initZap(conf *config.Configuration) *Logger {
+func NewLog(conf *config.Configuration) *zap.Logger {
 	rootPath := path.RootPath()
 
 	// 日志路径
@@ -75,9 +75,7 @@ func initZap(conf *config.Configuration) *Logger {
 		Compress:   conf.Log.Compress,
 	}
 
-	return &Logger{
-		zap.New(
-			zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig),
-				zapcore.AddSync(loggerWriter), level), options...),
-	}
+	return zap.New(
+		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig),
+			zapcore.AddSync(loggerWriter), level), options...)
 }

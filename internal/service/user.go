@@ -4,9 +4,9 @@ import (
 	v1 "colatiger/api/v1"
 	"colatiger/internal/model"
 	"colatiger/pkg/helper/hash"
-	"colatiger/pkg/helper/sid"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/sony/sonyflake"
 )
 
 type UserRepo interface {
@@ -18,10 +18,10 @@ type UserRepo interface {
 
 type UserService struct {
 	userRepo UserRepo
-	sid      *sid.Sid
+	sid      *sonyflake.Sonyflake
 }
 
-func NewUserService(userRepo UserRepo, sid *sid.Sid) *UserService {
+func NewUserService(userRepo UserRepo, sid *sonyflake.Sonyflake) *UserService {
 	return &UserService{
 		userRepo: userRepo,
 		sid:      sid,
@@ -42,7 +42,7 @@ func (u *UserService) Register(ctx context.Context, req v1.Register) error {
 	if user, err := u.userRepo.FindByEmail(ctx, req.Email); err == nil && user != nil {
 		return errors.New("用户名已经存在")
 	}
-	primaryKey, err := u.sid.GenInt64()
+	primaryKey, err := u.sid.NextID()
 	if err != nil {
 		return errors.Wrap(err, "failed to generate user ID")
 	}

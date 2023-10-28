@@ -1,10 +1,10 @@
 package http
 
 import (
-	"colatiger/pkg/log"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -14,11 +14,11 @@ type Server struct {
 	httpSrv *http.Server
 	host    string
 	port    int
-	logger  *log.Logger
+	logger  *zap.Logger
 }
 type Option func(s *Server)
 
-func NewServer(engine *gin.Engine, logger *log.Logger, opts ...Option) *Server {
+func NewServer(engine *gin.Engine, logger *zap.Logger, opts ...Option) *Server {
 	s := &Server{
 		Engine: engine,
 		logger: logger,

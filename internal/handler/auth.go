@@ -5,17 +5,17 @@ import (
 	v1 "colatiger/api/v1"
 	"colatiger/internal/model"
 	"colatiger/internal/service"
-	"colatiger/pkg/log"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type AuthHandler struct {
-	log         *log.Logger
+	log         *zap.Logger
 	jwtService  *service.JwtService
 	userService *service.UserService
 }
 
-func NewAuthHandler(log *log.Logger, jwtService *service.JwtService, userService *service.UserService) *AuthHandler {
+func NewAuthHandler(log *zap.Logger, jwtService *service.JwtService, userService *service.UserService) *AuthHandler {
 	return &AuthHandler{
 		log:         log,
 		jwtService:  jwtService,
