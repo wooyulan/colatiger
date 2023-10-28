@@ -2,17 +2,17 @@ package server
 
 import (
 	v1 "colatiger/api/response"
+	"colatiger/config"
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
 	"colatiger/internal/model"
 	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 )
 
 func NewHttpServer(logger *log.Logger,
-	conf *viper.Viper,
+	conf *config.Configuration,
 	cors *middleware.Cors,
 	jwtAuth *middleware.JWTAuth,
 	authHandler *handler.AuthHandler,
@@ -28,11 +28,11 @@ func NewHttpServer(logger *log.Logger,
 	s := http.NewServer(
 		gin.Default(),
 		logger,
-		http.WithServerHost(conf.GetString("http.host")),
-		http.WithServerPort(conf.GetInt("http.port")),
+		http.WithServerHost(conf.App.AppUrl),
+		http.WithServerPort(conf.App.Port),
 	)
 
-	if conf.GetString("app.env") == "prod" {
+	if conf.App.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	"colatiger/config"
 	"colatiger/internal/model"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -10,12 +10,12 @@ import (
 	"os"
 )
 
-func InitializeDB(conf *viper.Viper) *gorm.DB {
+func InitializeDB(conf *config.Configuration) *gorm.DB {
 	return initMySqlGorm(conf)
 }
 
 // 初始化 mysql gorm.DB
-func initMySqlGorm(conf *viper.Viper) *gorm.DB {
+func initMySqlGorm(conf *config.Configuration) *gorm.DB {
 
 	mysqlConfig := mysql.Config{
 		DSN:                       conf.GetString("data.mysql"), // DSN data source name

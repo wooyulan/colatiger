@@ -4,6 +4,7 @@
 package wire
 
 import (
+	"colatiger/config"
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
 	"colatiger/internal/repository"
