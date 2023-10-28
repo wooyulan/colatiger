@@ -3,27 +3,28 @@ package service
 import (
 	v1 "colatiger/api/v1"
 	"colatiger/internal/models"
-	"colatiger/internal/repository"
 	"colatiger/pkg/helper/hash"
 	"colatiger/pkg/helper/sid"
 	"context"
 	"github.com/pkg/errors"
 )
 
-type IUserService interface {
-	Register(ctx context.Context, reg v1.Register) error
-	Login(ctx context.Context, login v1.Login) (user *models.User, err error)
-	FindUserInfoById(ctx context.Context, userId string) (user *models.User, err error)
+type UserRepo interface {
+	Create(ctx context.Context, user *models.User) error
+	FindByEmail(ctx context.Context, email string) (*models.User, error)
+	FindByID(ctx context.Context, id string) (*models.User, error)
+	Update(ctx context.Context, user *models.User) error
 }
 
 type UserService struct {
-	userRepo repository.UserRepository
+	userRepo UserRepo
 	sid      *sid.Sid
 }
 
-func NewUserService(userRepo repository.UserRepository) *UserService {
+func NewUserService(userRepo UserRepo, sid *sid.Sid) *UserService {
 	return &UserService{
 		userRepo: userRepo,
+		sid:      sid,
 	}
 }
 

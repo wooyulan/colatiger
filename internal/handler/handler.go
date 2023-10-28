@@ -6,18 +6,6 @@ import (
 	"github.com/google/wire"
 )
 
-//type Handler struct {
-//	logger *log.Logger
-//	jwt    *jwt.JWT
-//}
-//
-//func NewHandler(logger *log.Logger, jwt *jwt.JWT) *Handler {
-//	return &Handler{
-//		logger: logger,
-//		jwt:    jwt,
-//	}
-//}
-
 func GetUserIdFromCtx(ctx *gin.Context) string {
 	v, exists := ctx.Get("claims")
 	if !exists {
@@ -26,4 +14,4 @@ func GetUserIdFromCtx(ctx *gin.Context) string {
 	return v.(*jwt.MyCustomClaims).UserId
 }
 
-var ProviderSet = wire.NewSet(NewUserHandler)
+var ProviderSet = wire.NewSet(NewUserHandler, NewChatHandler)

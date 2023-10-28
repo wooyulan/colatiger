@@ -2,24 +2,21 @@ package repository
 
 import (
 	"colatiger/internal/models"
+	"colatiger/internal/service"
+	"colatiger/pkg/log"
 	"context"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
 
-type UserRepository interface {
-	Create(ctx context.Context, user *models.User) error
-	FindByEmail(ctx context.Context, email string) (*models.User, error)
-	FindByID(ctx context.Context, id string) (*models.User, error)
-	Update(ctx context.Context, user *models.User) error
-}
-
 type userRepository struct {
 	repo *Repository
+	log  *log.Logger
 }
 
-func NewUserRepository(repo *Repository) UserRepository {
+func NewUserRepository(log *log.Logger, repo *Repository) service.UserRepo {
 	return &userRepository{
+		log:  log,
 		repo: repo,
 	}
 }

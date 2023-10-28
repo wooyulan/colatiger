@@ -1,11 +1,11 @@
 package main
 
 import (
+	"colatiger/cmd/wire"
 	"colatiger/pkg/config"
 	"colatiger/pkg/log"
 	"context"
 	"flag"
-	"github.com/google/wire"
 	"go.uber.org/zap"
 )
 

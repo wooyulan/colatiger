@@ -5,25 +5,19 @@ import (
 	"colatiger/api/v1/res"
 	"colatiger/internal/service"
 	"colatiger/pkg/jwt"
+	"colatiger/pkg/log"
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
 	"strconv"
 	"time"
 )
 
-type IUserHandler interface {
-	Register(ctx *gin.Context)
-	Login(ctx *gin.Context)
-	GetInfo(ctx *gin.Context)
-}
-
 type UserHandler struct {
-	log         *zap.Logger
+	log         *log.Logger
 	jwt         *jwt.JWT
 	userService *service.UserService
 }
 
-func NewUserHandler(log *zap.Logger, userService *service.UserService) *UserHandler {
+func NewUserHandler(log *log.Logger, userService *service.UserService) *UserHandler {
 	return &UserHandler{
 		log:         log,
 		userService: userService,

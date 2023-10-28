@@ -13,7 +13,6 @@ import (
 
 func NewHttpServer(logger *log.Logger,
 	conf *viper.Viper,
-	recovery *middleware.Recovery,
 	cors *middleware.Cors,
 	jwt *jwt.JWT,
 	userHandler *handler.UserHandler,
@@ -37,8 +36,6 @@ func NewHttpServer(logger *log.Logger,
 	if conf.GetString("app.env") == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
-
-	s.Use(gin.Logger(), recovery.Handler())
 
 	//跨域处理
 	s.Use(cors.CORSMiddleware())
