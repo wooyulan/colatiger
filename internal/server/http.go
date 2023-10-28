@@ -4,6 +4,7 @@ import (
 	v1 "colatiger/api/response"
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
+	"colatiger/internal/model"
 	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,7 @@ import (
 func NewHttpServer(logger *log.Logger,
 	conf *viper.Viper,
 	cors *middleware.Cors,
+	jwtAuth *middleware.JWTAuth,
 	authHandler *handler.AuthHandler,
 	chatHandler *handler.ChatHandler,
 ) *http.Server {
@@ -49,7 +51,7 @@ func NewHttpServer(logger *log.Logger,
 	}
 
 	// Non-strict permission routing group
-	authRouter := v1.Use()
+	authRouter := v1.Use(jwtAuth.Handler(model.AppGuardName))
 	{
 		authRouter.GET("/user/info", authHandler.GetInfo)
 	}

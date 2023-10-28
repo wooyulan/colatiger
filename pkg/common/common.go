@@ -1,8 +1,7 @@
-package middleware
+package common
 
 import "github.com/google/wire"
 
 var ProviderSet = wire.NewSet(
-	NewCors,
-	NewJWTAuth,
+	NewLockBuilder,
 )

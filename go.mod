@@ -6,17 +6,17 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-playground/validator/v10 v10.14.0
 	github.com/golang-jwt/jwt/v5 v5.0.0
-	github.com/google/go-tika v0.3.0
 	github.com/google/uuid v1.3.1
 	github.com/google/wire v0.5.0
+	github.com/jassue/gin-wire v0.0.0-20221010071222-0025a433e504
 	github.com/otiai10/gosseract/v2 v2.4.1
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.2.1
-	github.com/sirupsen/logrus v1.9.3
 	github.com/sony/sonyflake v1.2.0
 	github.com/spf13/viper v1.17.0
 	go.uber.org/zap v1.26.0
 	golang.org/x/crypto v0.14.0
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/gorm v1.25.5
 )
@@ -62,6 +62,5 @@ require (
 	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
-	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
