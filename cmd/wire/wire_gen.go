@@ -12,6 +12,7 @@ import (
 	"colatiger/internal/repository"
 	"colatiger/internal/server"
 	"colatiger/internal/service"
+	"colatiger/pkg/common"
 	"colatiger/pkg/helper/sid"
 	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
@@ -29,10 +30,13 @@ func NewWire(viperViper *viper.Viper, logger *log.Logger) (*server.App, func(), 
 	userRepo := repository.NewUserRepository(logger, repositoryRepository)
 	sidSid := sid.NewSid()
 	userService := service.NewUserService(userRepo, sidSid)
-	jwtService := service.NewJwtService(viperViper, logger, userService)
+	lockBuilder := common.NewLockBuilder(client)
+	jwtRepo := repository.NewJwtRepo(repositoryRepository, logger)
+	jwtService := service.NewJwtService(viperViper, logger, userService, lockBuilder, jwtRepo)
+	jwtAuth := middleware.NewJWTAuth(viperViper, jwtService)
 	authHandler := handler.NewAuthHandler(logger, jwtService, userService)
 	chatHandler := handler.NewChatHandler(logger)
-	httpServer := server.NewHttpServer(logger, viperViper, cors, authHandler, chatHandler)
+	httpServer := server.NewHttpServer(logger, viperViper, cors, jwtAuth, authHandler, chatHandler)
 	app := newApp(httpServer)
 	return app, func() {
 	}, nil
