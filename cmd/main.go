@@ -1,9 +1,8 @@
 package main
 
 import (
+	"colatiger/cmd/bootstrap"
 	"colatiger/cmd/wire"
-	"colatiger/pkg/conf"
-	"colatiger/pkg/log"
 	"context"
 	"flag"
 	"go.uber.org/zap"
@@ -14,8 +13,8 @@ func main() {
 	var envConf = flag.String("conf", "./conf/local.yaml", "conf path, eg: -conf ./conf/local.yaml")
 	flag.Parse()
 
-	config := conf.NewConfig(*envConf)
-	logger := log.NewLog(config)
+	config := bootstrap.NewConfig(*envConf)
+	logger := bootstrap.NewLog(config)
 
 	app, cleanup, err := wire.NewWire(config, logger)
 	defer cleanup()

@@ -1,4 +1,4 @@
-package log
+package bootstrap
 
 import (
 	"colatiger/config"
