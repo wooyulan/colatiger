@@ -21,10 +21,7 @@ func NewHttpServer(logger *log.Logger,
 
 	// 初始化验证器
 	middleware.InitializeValidator()
-
-	// 初始化表结构
-	middleware.InitializeDB(conf)
-
+	
 	s := http.NewServer(
 		gin.Default(),
 		logger,

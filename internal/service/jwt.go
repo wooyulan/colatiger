@@ -2,6 +2,7 @@ package service
 
 import (
 	cErr "colatiger/api/error"
+	"colatiger/config"
 	"colatiger/internal/model"
 	"colatiger/pkg/common"
 	"colatiger/pkg/log"
@@ -9,19 +10,18 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/spf13/viper"
 	"time"
 )
 
 type JwtService struct {
-	conf        *viper.Viper
+	conf        *config.Configuration
 	log         *log.Logger
 	uS          *UserService
 	lockBuilder *common.LockBuilder
 	jRepo       JwtRepo
 }
 
-func NewJwtService(conf *viper.Viper, log *log.Logger, uS *UserService, lockBuilder *common.LockBuilder, jRepo JwtRepo) *JwtService {
+func NewJwtService(conf *config.Configuration, log *log.Logger, uS *UserService, lockBuilder *common.LockBuilder, jRepo JwtRepo) *JwtService {
 	return &JwtService{
 		conf:        conf,
 		log:         log,
@@ -42,7 +42,7 @@ func (s *JwtService) CreateToken(GuardName string, user model.JwtUser) (*model.T
 		model.CustomClaims{
 			Key: GuardName,
 			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(s.conf.GetInt("jwt.jwt_ttl")))),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(s.conf.Jwt.JwtTtl))),
 				NotBefore: jwt.NewNumericDate(time.Now().Add(time.Second * -1000)),
 				IssuedAt:  jwt.NewNumericDate(time.Now()),
 				ID:        user.GetUid(),
@@ -50,14 +50,14 @@ func (s *JwtService) CreateToken(GuardName string, user model.JwtUser) (*model.T
 		},
 	)
 
-	tokenStr, err := token.SignedString([]byte(s.conf.GetString("jwt.secret")))
+	tokenStr, err := token.SignedString([]byte(s.conf.Jwt.Secret))
 	if err != nil {
 		return nil, nil, cErr.BadRequest("create token error:" + err.Error())
 	}
 
 	return &model.TokenOutPut{
 		AccessToken: tokenStr,
-		ExpiresIn:   int(s.conf.GetInt("jwt.jwt_ttl")),
+		ExpiresIn:   int(s.conf.Jwt.JwtTtl),
 	}, token, nil
 }
 
@@ -80,7 +80,7 @@ func (s *JwtService) IsInBlacklist(ctx *gin.Context, tokenStr string) bool {
 		return false
 	}
 
-	if time.Now().Unix()-joinUnix < s.conf.GetInt64("jwt.jwt_blacklist_grace_period") {
+	if time.Now().Unix()-joinUnix < s.conf.Jwt.JwtBlacklistGracePeriod {
 		return false
 	}
 	return true
@@ -98,7 +98,7 @@ func (s *JwtService) GetUserInfo(ctx *gin.Context, guardName, id string) (model.
 func (s *JwtService) RefreshToken(ctx *gin.Context, guardName string, token *jwt.Token) (*model.TokenOutPut, error) {
 	idStr := token.Claims.(*model.CustomClaims).ID
 
-	lock := s.lockBuilder.NewLock(ctx, "refresh_token_lock:"+idStr, s.conf.GetInt64("jwt.jwt_blacklist_grace_period"))
+	lock := s.lockBuilder.NewLock(ctx, "refresh_token_lock:"+idStr, s.conf.Jwt.JwtBlacklistGracePeriod)
 
 	if lock.Get() {
 		user, err := s.GetUserInfo(ctx, guardName, idStr)
