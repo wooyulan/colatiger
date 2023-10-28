@@ -1,6 +1,7 @@
 package jwt
 
 import (
+	"colatiger/pkg/log"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
@@ -10,6 +11,7 @@ import (
 
 type JWT struct {
 	key []byte
+	log *log.Logger
 }
 
 type MyCustomClaims struct {
@@ -17,8 +19,8 @@ type MyCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func NewJwt(conf *viper.Viper) *JWT {
-	return &JWT{key: []byte(conf.GetString("security.jwt.key"))}
+func NewJwt(conf *viper.Viper, log *log.Logger) *JWT {
+	return &JWT{key: []byte(conf.GetString("security.jwt.key")), log: log}
 }
 
 func (j *JWT) GenToken(userId string, expiresAt time.Time) (string, error) {

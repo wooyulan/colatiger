@@ -3,14 +3,11 @@ http:
   host: 0.0.0.0
   port: 8000
 
-security:
-  api_sign:
-    app_key: 123456
-    app_security: 123456
-  jwt:
-    key: QQYnRFerJTSEcrfB89fw8prOaObmrch8
-    ttl: 43200
-    refresh_grace_period: 1800
+jwt:
+  secret: '3Bde3BGEbYqtqyEUzW3ry8jKFcaPH17fRmTmqE7MDr05Lwj95uruRKrrkb44TJ4s'
+  jwt_ttl: 43200
+  jwt_blacklist_grace_period: 10
+  refresh_grace_period: 1800
 
 data:
   mysql: root:Abcd1234@tcp(127.0.0.1:3308)/cola_tiger?charset=utf8mb4&parseTime=True&loc=Local

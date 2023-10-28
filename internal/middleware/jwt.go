@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"colatiger/api/v1/res"
+	"colatiger/api/response"
 	"colatiger/pkg/jwt"
 	"github.com/gin-gonic/gin"
 )
@@ -10,14 +10,14 @@ func StrictAuth(j *jwt.JWT) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		tokenString := ctx.Request.Header.Get("Authorization")
 		if tokenString == "" {
-			res.TokenFail(ctx)
+			response.TokenFail(ctx)
 			ctx.Abort()
 			return
 		}
 
 		claims, err := j.ParseToken(tokenString)
 		if err != nil {
-			res.TokenFail(ctx)
+			response.TokenFail(ctx)
 			ctx.Abort()
 			return
 		}

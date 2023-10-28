@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"colatiger/api/response"
 	v1 "colatiger/api/v1"
-	"colatiger/api/v1/res"
 	"colatiger/internal/service"
 	"colatiger/pkg/jwt"
 	"colatiger/pkg/log"
@@ -27,47 +27,47 @@ func NewUserHandler(log *log.Logger, userService *service.UserService) *UserHand
 func (u *UserHandler) Register(ctx *gin.Context) {
 	var form v1.Register
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		res.ValidateFail(ctx, v1.GetErrorMsg(form, err))
+		response.ValidateFail(ctx, v1.GetErrorMsg(form, err))
 		return
 	}
 
 	if err := u.userService.Register(ctx, form); err != nil {
-		res.BusinessFail(ctx, "")
+		response.BusinessFail(ctx, "")
 	} else {
-		res.Success(ctx, nil)
+		response.Success(ctx, nil)
 	}
 }
 
 func (u *UserHandler) Login(ctx *gin.Context) {
 	var form v1.Login
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		res.ValidateFail(ctx, v1.GetErrorMsg(form, err))
+		response.ValidateFail(ctx, v1.GetErrorMsg(form, err))
 		return
 	}
 
 	if user, err := u.userService.Login(ctx, form); err != nil {
-		res.BusinessFail(ctx, err.Error())
+		response.BusinessFail(ctx, err.Error())
 	} else {
 		tokenData, err := u.jwt.GenToken(strconv.FormatInt(user.Id, 10), time.Now().Add(time.Hour*24*90))
 		if err != nil {
-			res.BusinessFail(ctx, err.Error())
+			response.BusinessFail(ctx, err.Error())
 			return
 		}
-		res.Success(ctx, tokenData)
+		response.Success(ctx, tokenData)
 	}
 }
 
 func (u *UserHandler) GetInfo(ctx *gin.Context) {
 	userId := GetUserIdFromCtx(ctx)
 	if userId == "" {
-		res.TokenFail(ctx)
+		response.TokenFail(ctx)
 		return
 	}
 	user, err := u.userService.FindUserInfoById(ctx, userId)
 	if err != nil {
-		res.TokenFail(ctx)
+		response.TokenFail(ctx)
 		return
 	}
 
-	res.Success(ctx, user)
+	response.Success(ctx, user)
 }

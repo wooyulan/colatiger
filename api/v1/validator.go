@@ -1,6 +1,9 @@
 package v1
 
-import "github.com/go-playground/validator/v10"
+import (
+	cErr "colatiger/api/error"
+	"github.com/go-playground/validator/v10"
+)
 
 type Validator interface {
 	GetMessages() ValidatorMessages
@@ -9,7 +12,7 @@ type Validator interface {
 type ValidatorMessages map[string]string
 
 // GetErrorMsg 获取错误信息
-func GetErrorMsg(request interface{}, err error) string {
+func GetErrorMsg(request interface{}, err error) *cErr.Error {
 	if _, isValidatorErrors := err.(validator.ValidationErrors); isValidatorErrors {
 		_, isValidator := request.(Validator)
 
@@ -17,12 +20,12 @@ func GetErrorMsg(request interface{}, err error) string {
 			// 若 request 结构体实现 Validator 接口即可实现自定义错误信息
 			if isValidator {
 				if message, exist := request.(Validator).GetMessages()[v.Field()+"."+v.Tag()]; exist {
-					return message
+					return cErr.ValidateErr(message)
 				}
 			}
-			return v.Error()
+			return cErr.ValidateErr(v.Error())
 		}
 	}
 
-	return "Parameter error"
+	return cErr.ValidateErr("Parameter error")
 }

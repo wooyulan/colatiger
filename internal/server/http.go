@@ -1,7 +1,7 @@
 package server
 
 import (
-	v1 "colatiger/api/v1/res"
+	v1 "colatiger/api/response"
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
 	"colatiger/pkg/jwt"
@@ -25,7 +25,6 @@ func NewHttpServer(logger *log.Logger,
 	// 初始化表结构
 	middleware.InitializeDB(conf)
 
-	gin.SetMode(gin.ReleaseMode)
 	s := http.NewServer(
 		gin.Default(),
 		logger,

@@ -24,7 +24,7 @@ import (
 
 func NewWire(viperViper *viper.Viper, logger *log.Logger) (*server.App, func(), error) {
 	cors := middleware.NewCors()
-	jwtJWT := jwt.NewJwt(viperViper)
+	jwtJWT := jwt.NewJwt(viperViper,logger)
 	db := repository.NewDB(viperViper, logger)
 	client := repository.NewRedis(viperViper)
 	repositoryRepository := repository.NewRepository(logger, db, client)
