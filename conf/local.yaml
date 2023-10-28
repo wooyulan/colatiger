@@ -1,8 +1,8 @@
 app:
   env: 'local'
-  port: 8888
+  port: 8000
   app_name: 'colatiger'
-  app_url: 'http://localhost'
+  app_url: '0.0.0.0'
 
 jwt:
   secret: '3Bde3BGEbYqtqyEUzW3ry8jKFcaPH17fRmTmqE7MDr05Lwj95uruRKrrkb44TJ4s'

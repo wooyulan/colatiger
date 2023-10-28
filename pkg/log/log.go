@@ -11,14 +11,6 @@ import (
 	"time"
 )
 
-//type Logger struct {
-//	*zap.Logger
-//}
-//
-//func NewLog(conf *config.Configuration) *Logger {
-//	return initZap(conf)
-//}
-
 func NewLog(conf *config.Configuration) *zap.Logger {
 	rootPath := path.RootPath()
 

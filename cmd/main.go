@@ -7,21 +7,22 @@ import (
 	"context"
 	"flag"
 	"go.uber.org/zap"
+	"strconv"
 )
 
 func main() {
 	var envConf = flag.String("conf", "./conf/local.yaml", "conf path, eg: -conf ./conf/local.yaml")
 	flag.Parse()
 
-	configGlobal := conf.NewConfig(*envConf)
-	logger := log.NewLog(configGlobal)
+	config := conf.NewConfig(*envConf)
+	logger := log.NewLog(config)
 
-	app, cleanup, err := wire.NewWire(configGlobal, logger)
+	app, cleanup, err := wire.NewWire(config, logger)
 	defer cleanup()
 	if err != nil {
 		panic(err)
 	}
-	logger.Info("server start", zap.String("host", "http://127.0.0.1:"+conf.GetString("http.port")))
+	logger.Info("server start", zap.String("host", config.App.AppUrl+strconv.Itoa(config.App.Port)))
 	if err = app.Run(context.Background()); err != nil {
 		panic(err)
 	}
