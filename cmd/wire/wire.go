@@ -14,7 +14,6 @@ import (
 	"colatiger/pkg/log"
 	"colatiger/pkg/server/http"
 	"github.com/google/wire"
-	"github.com/spf13/viper"
 )
 
 var serverSet = wire.NewSet(server.NewHttpServer)
@@ -27,7 +26,7 @@ func newApp(httpServer *http.Server) *server.App {
 	)
 }
 
-func NewWire(*viper.Viper, *log.Logger) (*server.App, func(), error) {
+func NewWire(*config.Configuration, *log.Logger) (*server.App, func(), error) {
 	panic(wire.Build(
 		repository.ProviderSet,
 		service.ProviderSet,

@@ -10,9 +10,12 @@ import (
 )
 
 func main() {
-	var envConf = flag.String("conf", "./config/local.yaml", "config path, eg: -conf ./config/local.yaml")
+	var envConf = flag.String("conf", "./conf/local.yaml", "conf path, eg: -conf ./conf/local.yaml")
 	flag.Parse()
-	conf := config.NewConfig(*envConf)
+
+	conf := config.InitConf(*envConf)
+
+	//	conf := config.NewConfig(*envConf)
 
 	logger := log.NewLog(conf)
 

@@ -1,8 +1,8 @@
 package log
 
 import (
+	"colatiger/config"
 	"colatiger/pkg/helper/path"
-	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -15,15 +15,15 @@ type Logger struct {
 	*zap.Logger
 }
 
-func NewLog(conf *viper.Viper) *Logger {
+func NewLog(conf *config.Configuration) *Logger {
 	return initZap(conf)
 }
 
-func initZap(conf *viper.Viper) *Logger {
+func initZap(conf *config.Configuration) *Logger {
 	rootPath := path.RootPath()
 
 	// 日志路径
-	logFileDir := conf.GetString("log.root_dir")
+	logFileDir := conf.Log.RootDir
 	if !filepath.IsAbs(logFileDir) {
 		logFileDir = filepath.Join(rootPath, logFileDir)
 	}
@@ -32,7 +32,7 @@ func initZap(conf *viper.Viper) *Logger {
 		_ = os.Mkdir(logFileDir, os.ModePerm)
 	}
 
-	lv := conf.GetString("log.level")
+	lv := conf.Log.Level
 
 	var level zapcore.Level  // zap 日志等级
 	var options []zap.Option // zap 配置项
@@ -64,15 +64,15 @@ func initZap(conf *viper.Viper) *Logger {
 		encoder.AppendString(time.Format("2006-01-02 15:04:05.000"))
 	}
 	encoderConfig.EncodeLevel = func(l zapcore.Level, encoder zapcore.PrimitiveArrayEncoder) {
-		encoder.AppendString(conf.GetString("app.env") + "." + l.String())
+		encoder.AppendString(conf.App.Env + "." + l.String())
 	}
 
 	loggerWriter := &lumberjack.Logger{
-		Filename:   filepath.Join(logFileDir, conf.GetString("log.filename")),
-		MaxSize:    conf.GetInt("log.max_size"),
-		MaxBackups: conf.GetInt("log.max_backups"),
-		MaxAge:     conf.GetInt("log.max_age"),
-		Compress:   conf.GetBool("log.compress"),
+		Filename:   filepath.Join(logFileDir, conf.Log.Filename),
+		MaxSize:    conf.Log.MaxSize,
+		MaxBackups: conf.Log.MaxBackups,
+		MaxAge:     conf.Log.MaxAge,
+		Compress:   conf.Log.Compress,
 	}
 
 	return &Logger{
