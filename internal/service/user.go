@@ -2,7 +2,7 @@ package service
 
 import (
 	v1 "colatiger/api/v1"
-	"colatiger/internal/models"
+	"colatiger/internal/model"
 	"colatiger/pkg/helper/hash"
 	"colatiger/pkg/helper/sid"
 	"context"
@@ -10,10 +10,10 @@ import (
 )
 
 type UserRepo interface {
-	Create(ctx context.Context, user *models.User) error
-	FindByEmail(ctx context.Context, email string) (*models.User, error)
-	FindByID(ctx context.Context, id string) (*models.User, error)
-	Update(ctx context.Context, user *models.User) error
+	Create(ctx context.Context, user *model.User) error
+	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	FindByID(ctx context.Context, id string) (*model.User, error)
+	Update(ctx context.Context, user *model.User) error
 }
 
 type UserService struct {
@@ -29,7 +29,7 @@ func NewUserService(userRepo UserRepo, sid *sid.Sid) *UserService {
 }
 
 // Login 用户登录
-func (u *UserService) Login(ctx context.Context, login v1.Login) (user *models.User, err error) {
+func (u *UserService) Login(ctx context.Context, login v1.Login) (user *model.User, err error) {
 	user, err = u.userRepo.FindByEmail(ctx, login.Username)
 	if err != nil || !hash.BcryptMakeCheck([]byte(login.Password), user.Password) {
 		err = errors.Wrap(err, "用户不存在或密码错误")
@@ -47,7 +47,7 @@ func (u *UserService) Register(ctx context.Context, req v1.Register) error {
 		return errors.Wrap(err, "failed to generate user ID")
 	}
 	// Create a user
-	var user = &models.User{
+	var user = &model.User{
 		Id:       primaryKey,
 		Password: hash.BcryptMake([]byte(req.Password)),
 		Mobile:   req.Mobile,
@@ -60,7 +60,7 @@ func (u *UserService) Register(ctx context.Context, req v1.Register) error {
 }
 
 // 获取根据用户id获取
-func (u *UserService) FindUserInfoById(ctx context.Context, userId string) (user *models.User, err error) {
+func (u *UserService) FindUserInfoById(ctx context.Context, userId string) (user *model.User, err error) {
 	if user, err = u.userRepo.FindByID(ctx, userId); err != nil || user == nil {
 		return nil, errors.New("当前用户不存在")
 	}

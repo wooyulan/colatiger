@@ -2,7 +2,7 @@ package service
 
 import (
 	cErr "colatiger/api/error"
-	"colatiger/internal/models"
+	"colatiger/internal/model"
 	"colatiger/pkg/log"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/spf13/viper"
@@ -23,10 +23,10 @@ func NewJwtService(conf *viper.Viper, log *log.Logger, uS *UserService) *JwtServ
 	}
 }
 
-func (s *JwtService) CreateToken(GuardName string, user models.JwtUser) (*models.TokenOutPut, *jwt.Token, error) {
+func (s *JwtService) CreateToken(GuardName string, user model.JwtUser) (*model.TokenOutPut, *jwt.Token, error) {
 	token := jwt.NewWithClaims(
 		jwt.SigningMethodHS256,
-		models.CustomClaims{
+		model.CustomClaims{
 			Key: GuardName,
 			RegisteredClaims: jwt.RegisteredClaims{
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Second * time.Duration(s.conf.GetInt("jwt.jwt_ttl")))),
@@ -42,7 +42,7 @@ func (s *JwtService) CreateToken(GuardName string, user models.JwtUser) (*models
 		return nil, nil, cErr.BadRequest("create token error:" + err.Error())
 	}
 
-	return &models.TokenOutPut{
+	return &model.TokenOutPut{
 		AccessToken: tokenStr,
 		ExpiresIn:   int(s.conf.GetInt("jwt.jwt_ttl")),
 	}, token, nil

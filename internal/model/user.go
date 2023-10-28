@@ -1,4 +1,6 @@
-package models
+package model
+
+import "strconv"
 
 type User struct {
 	Id       int64  `json:"id" gorm:"primaryKey"`
@@ -13,4 +15,8 @@ type User struct {
 
 func (u *User) TableName() string {
 	return "t_user"
+}
+
+func (u *User) GetUid() string {
+	return strconv.Itoa(int(u.Id))
 }

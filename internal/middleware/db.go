@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"colatiger/internal/models"
+	"colatiger/internal/model"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
@@ -43,7 +43,7 @@ func initMySqlGorm(conf *viper.Viper) *gorm.DB {
 func initMySqlTables(db *gorm.DB) {
 	log.Print("init table start...")
 	err := db.AutoMigrate(
-		models.User{},
+		model.User{},
 	)
 	if err != nil {
 		log.Printf("migrate table failed err:%v", zap.Any("err", err))

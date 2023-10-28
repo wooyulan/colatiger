@@ -33,7 +33,6 @@ func NewWire(*viper.Viper, *log.Logger) (*server.App, func(), error) {
 		handler.ProviderSet,
 		middleware.ProviderSet,
 		serverSet,
-		//jwt.NewJwt,
 		sid.NewSid,
 		newApp,
 	))
