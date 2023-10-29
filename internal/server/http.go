@@ -17,6 +17,7 @@ func NewHttpServer(logger *zap.Logger,
 	jwtAuth *middleware.JWTAuth,
 	authHandler *handler.AuthHandler,
 	chatHandler *handler.ChatHandler,
+	ossHandler *handler.OssHandler,
 	recovery *middleware.Recovery,
 ) *http.Server {
 
@@ -48,6 +49,7 @@ func NewHttpServer(logger *zap.Logger,
 	{
 		noAuthRouter.POST("/auth/register", authHandler.Register)
 		noAuthRouter.POST("/auth/login", authHandler.Login)
+		noAuthRouter.POST("/upload", ossHandler.Upload)
 	}
 
 	// Non-strict permission routing group

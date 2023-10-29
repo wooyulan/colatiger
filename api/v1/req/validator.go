@@ -1,4 +1,4 @@
-package v1
+package req
 
 import (
 	cErr "colatiger/api/error"

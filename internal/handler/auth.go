@@ -2,7 +2,7 @@ package handler
 
 import (
 	"colatiger/api/response"
-	v1 "colatiger/api/v1"
+	"colatiger/api/v1/req"
 	"colatiger/internal/model"
 	"colatiger/internal/service"
 	"github.com/gin-gonic/gin"
@@ -24,9 +24,9 @@ func NewAuthHandler(log *zap.Logger, jwtService *service.JwtService, userService
 }
 
 func (u *AuthHandler) Register(ctx *gin.Context) {
-	var form v1.Register
+	var form req.Register
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		response.FailByErr(ctx, v1.GetErrorMsg(form, err))
+		response.FailByErr(ctx, req.GetErrorMsg(form, err))
 		return
 	}
 
@@ -38,9 +38,9 @@ func (u *AuthHandler) Register(ctx *gin.Context) {
 }
 
 func (u *AuthHandler) Login(ctx *gin.Context) {
-	var form v1.Login
+	var form req.Login
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		response.FailByErr(ctx, v1.GetErrorMsg(form, err))
+		response.FailByErr(ctx, req.GetErrorMsg(form, err))
 		return
 	}
 
