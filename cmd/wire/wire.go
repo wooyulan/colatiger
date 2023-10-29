@@ -14,6 +14,7 @@ import (
 	"colatiger/pkg/server/http"
 	"github.com/google/wire"
 	"go.uber.org/zap"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var serverSet = wire.NewSet(server.NewHttpServer)
