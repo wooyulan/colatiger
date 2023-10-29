@@ -2,33 +2,34 @@ package service
 
 import (
 	v1 "colatiger/api/v1"
-	"colatiger/internal/models"
-	"colatiger/internal/repository"
+	"colatiger/internal/model"
 	"colatiger/pkg/helper/hash"
 	"context"
 	"github.com/pkg/errors"
+	"github.com/sony/sonyflake"
 )
 
-type UserService interface {
-	Register(ctx context.Context, reg v1.Register) error
-	Login(ctx context.Context, login v1.Login) (user *models.User, err error)
-	FindUserInfoById(ctx context.Context, userId string) (user *models.User, err error)
+type UserRepo interface {
+	Create(ctx context.Context, user *model.User) error
+	FindByEmail(ctx context.Context, email string) (*model.User, error)
+	FindByID(ctx context.Context, id string) (*model.User, error)
+	Update(ctx context.Context, user *model.User) error
 }
 
-type userService struct {
-	userRepo repository.UserRepository
-	*Service
+type UserService struct {
+	userRepo UserRepo
+	sid      *sonyflake.Sonyflake
 }
 
-func NewUserService(service *Service, userRepo repository.UserRepository) UserService {
-	return &userService{
+func NewUserService(userRepo UserRepo, sid *sonyflake.Sonyflake) *UserService {
+	return &UserService{
 		userRepo: userRepo,
-		Service:  service,
+		sid:      sid,
 	}
 }
 
 // Login 用户登录
-func (u userService) Login(ctx context.Context, login v1.Login) (user *models.User, err error) {
+func (u *UserService) Login(ctx context.Context, login v1.Login) (user *model.User, err error) {
 	user, err = u.userRepo.FindByEmail(ctx, login.Username)
 	if err != nil || !hash.BcryptMakeCheck([]byte(login.Password), user.Password) {
 		err = errors.Wrap(err, "用户不存在或密码错误")
@@ -37,16 +38,16 @@ func (u userService) Login(ctx context.Context, login v1.Login) (user *models.Us
 }
 
 // Register 用户注册
-func (u userService) Register(ctx context.Context, req v1.Register) error {
+func (u *UserService) Register(ctx context.Context, req v1.Register) error {
 	if user, err := u.userRepo.FindByEmail(ctx, req.Email); err == nil && user != nil {
 		return errors.New("用户名已经存在")
 	}
-	primaryKey, err := u.sid.GenInt64()
+	primaryKey, err := u.sid.NextID()
 	if err != nil {
 		return errors.Wrap(err, "failed to generate user ID")
 	}
 	// Create a user
-	var user = &models.User{
+	var user = &model.User{
 		Id:       primaryKey,
 		Password: hash.BcryptMake([]byte(req.Password)),
 		Mobile:   req.Mobile,
@@ -59,7 +60,7 @@ func (u userService) Register(ctx context.Context, req v1.Register) error {
 }
 
 // 获取根据用户id获取
-func (u userService) FindUserInfoById(ctx context.Context, userId string) (user *models.User, err error) {
+func (u *UserService) FindUserInfoById(ctx context.Context, userId string) (user *model.User, err error) {
 	if user, err = u.userRepo.FindByID(ctx, userId); err != nil || user == nil {
 		return nil, errors.New("当前用户不存在")
 	}

@@ -1,10 +1,10 @@
 package http
 
 import (
-	"colatiger/pkg/log"
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -14,11 +14,11 @@ type Server struct {
 	httpSrv *http.Server
 	host    string
 	port    int
-	logger  *log.Logger
+	logger  *zap.Logger
 }
 type Option func(s *Server)
 
-func NewServer(engine *gin.Engine, logger *log.Logger, opts ...Option) *Server {
+func NewServer(engine *gin.Engine, logger *zap.Logger, opts ...Option) *Server {
 	s := &Server{
 		Engine: engine,
 		logger: logger,
@@ -46,7 +46,7 @@ func (s *Server) Start(ctx context.Context) error {
 	}
 
 	if err := s.httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		s.logger.Fatalf("listen: %s\n", err)
+		s.logger.Sugar().Fatalf("listen: %s\n", err)
 	}
 
 	return nil
@@ -59,7 +59,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := s.httpSrv.Shutdown(ctx); err != nil {
-		s.logger.Fatal("Server forced to shutdown: ", err)
+		s.logger.Sugar().Fatal("Server forced to shutdown: ", err)
 	}
 
 	s.logger.Info("Server exiting")

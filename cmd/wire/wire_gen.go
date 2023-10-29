@@ -7,52 +7,53 @@
 package wire
 
 import (
+	"colatiger/config"
 	"colatiger/internal/handler"
+	"colatiger/internal/middleware"
 	"colatiger/internal/repository"
 	"colatiger/internal/server"
 	"colatiger/internal/service"
-	"colatiger/pkg/app"
-	"colatiger/pkg/helper/sid"
-	"colatiger/pkg/jwt"
-	"colatiger/pkg/log"
+	"colatiger/pkg/common"
 	"colatiger/pkg/server/http"
 	"github.com/google/wire"
-	"github.com/spf13/viper"
+	"go.uber.org/zap"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 // Injectors from wire.go:
 
-func NewWire(viperViper *viper.Viper, logger *log.Logger) (*app.App, func(), error) {
-	jwtJWT := jwt.NewJwt(viperViper)
-	handlerHandler := handler.NewHandler(logger, jwtJWT)
-	sidSid := sid.NewSid()
-	serviceService := service.NewService(logger, sidSid)
-	db := repository.NewDB(viperViper, logger)
-	client := repository.NewRedis(viperViper)
-	repositoryRepository := repository.NewRepository(logger, db, client)
-	userRepository := repository.NewUserRepository(repositoryRepository)
-	userService := service.NewUserService(serviceService, userRepository)
-	userHandler := handler.NewUserHandler(handlerHandler, userService)
-
-	chatHandler := handler.NewChatHandler(handlerHandler)
-
-	httpServer := server.NewHttpServer(logger, viperViper, jwtJWT, userHandler,chatHandler)
-	appApp := newApp(httpServer)
-	return appApp, func() {
+func NewWire(configuration *config.Configuration, logger *zap.Logger, lumberjackLogger *lumberjack.Logger) (*server.App, func(), error) {
+	cors := middleware.NewCors()
+	db := repository.NewDB(configuration, logger)
+	client := repository.NewRedis(configuration, logger)
+	sonyflake := common.NewSonyFlake()
+	minioClient := repository.NewOss(configuration, logger)
+	repositoryRepository, cleanup, err := repository.NewRepository(logger, db, client, sonyflake, minioClient)
+	if err != nil {
+		return nil, nil, err
+	}
+	userRepo := repository.NewUserRepository(logger, repositoryRepository)
+	userService := service.NewUserService(userRepo)
+	lockBuilder := common.NewLockBuilder(client)
+	jwtRepo := repository.NewJwtRepo(repositoryRepository, logger)
+	jwtService := service.NewJwtService(configuration, logger, userService, lockBuilder, jwtRepo)
+	jwtAuth := middleware.NewJWTAuth(configuration, jwtService)
+	authHandler := handler.NewAuthHandler(logger, jwtService, userService)
+	chatHandler := handler.NewChatHandler(logger)
+	ossHandler := handler.NewOssHandler(logger, minioClient, sonyflake, configuration)
+	recovery := middleware.NewRecovery(lumberjackLogger)
+	httpServer := server.NewHttpServer(logger, configuration, cors, jwtAuth, authHandler, chatHandler, ossHandler, recovery)
+	app := newApp(httpServer)
+	return app, func() {
+		cleanup()
 	}, nil
 }
 
 // wire.go:
 
-var handlerSet = wire.NewSet(handler.NewHandler, handler.NewUserHandler, handler.NewChatHandler)
-
-var serviceSet = wire.NewSet(service.NewService, service.NewUserService)
-
-var repositorySet = wire.NewSet(repository.NewDB, repository.NewRedis, repository.NewRepository, repository.NewUserRepository)
-
 var serverSet = wire.NewSet(server.NewHttpServer)
 
 // build App
-func newApp(httpServer *http.Server) *app.App {
-	return app.NewApp(app.WithServer(httpServer), app.WithName("cola-tiger-server"))
+func newApp(httpServer *http.Server) *server.App {
+	return server.NewApp(server.WithServer(httpServer), server.WithName("cola-tiger-server"))
 }

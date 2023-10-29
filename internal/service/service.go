@@ -1,18 +1,7 @@
 package service
 
 import (
-	"colatiger/pkg/helper/sid"
-	"colatiger/pkg/log"
+	"github.com/google/wire"
 )
 
-type Service struct {
-	logger *log.Logger
-	sid    *sid.Sid
-}
-
-func NewService(logger *log.Logger, sid *sid.Sid) *Service {
-	return &Service{
-		logger: logger,
-		sid:    sid,
-	}
-}
+var ProviderSet = wire.NewSet(NewUserService, NewJwtService)

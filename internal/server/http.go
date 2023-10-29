@@ -1,60 +1,67 @@
 package server
 
 import (
-	v1 "colatiger/api/v1/res"
+	v1 "colatiger/api/response"
+	"colatiger/config"
 	"colatiger/internal/handler"
 	"colatiger/internal/middleware"
-	"colatiger/pkg/jwt"
-	"colatiger/pkg/log"
+	"colatiger/internal/model"
 	"colatiger/pkg/server/http"
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
-func NewHttpServer(logger *log.Logger,
-	conf *viper.Viper,
-	jwt *jwt.JWT,
-	userHandler handler.UserHandler,
-	chatHandler handler.ChatHandler,
+func NewHttpServer(logger *zap.Logger,
+	conf *config.Configuration,
+	cors *middleware.Cors,
+	jwtAuth *middleware.JWTAuth,
+	authHandler *handler.AuthHandler,
+	chatHandler *handler.ChatHandler,
+	recovery *middleware.Recovery,
 ) *http.Server {
 
 	// 初始化验证器
 	middleware.InitializeValidator()
 
-	// 初始化表结构
-	middleware.InitializeDB(conf)
-
-	gin.SetMode(gin.ReleaseMode)
-
 	s := http.NewServer(
 		gin.Default(),
 		logger,
-		http.WithServerHost(conf.GetString("http.host")),
-		http.WithServerPort(conf.GetInt("http.port")),
+		http.WithServerHost(conf.App.AppUrl),
+		http.WithServerPort(conf.App.Port),
 	)
 
-	//s.Use(
-	//	middleware.CORSMiddleware(),
-	//)
+	if conf.App.Env == "prod" || conf.App.Env == "local" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	s.Use(gin.Logger(), recovery.Handler())
+
+	//跨域处理
+	s.Use(cors.CORSMiddleware())
+
 	s.GET("/", func(ctx *gin.Context) {
-		logger.WithContext(ctx).Info("hello")
 		v1.Success(ctx, "welcome user colatiger")
 	})
-
-	s.POST("/chat", chatHandler.ChatStream)
 
 	v1 := s.Group("/api/v1")
 	noAuthRouter := v1
 	{
-		noAuthRouter.POST("/auth/register", userHandler.Register)
-		noAuthRouter.POST("/auth/login", userHandler.Login)
+		noAuthRouter.POST("/auth/register", authHandler.Register)
+		noAuthRouter.POST("/auth/login", authHandler.Login)
 	}
 
 	// Non-strict permission routing group
-	authRouter := v1.Use(middleware.NoStrictAuth(jwt))
+	authRouter := v1.Use(jwtAuth.Handler(model.AppGuardName))
 	{
-		authRouter.GET("/user/info", userHandler.GetInfo)
+		authRouter.GET("/user/info", authHandler.GetInfo)
 	}
+
+	// 对话
+	chatRouter := v1
+	{
+		chatRouter.POST("/chat/stream", middleware.HeadersMiddleware(), chatHandler.ChatStream)
+	}
+
 	return s
 
 }
