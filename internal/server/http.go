@@ -17,6 +17,7 @@ func NewHttpServer(logger *zap.Logger,
 	jwtAuth *middleware.JWTAuth,
 	authHandler *handler.AuthHandler,
 	chatHandler *handler.ChatHandler,
+	recovery *middleware.Recovery,
 ) *http.Server {
 
 	// 初始化验证器
@@ -32,6 +33,8 @@ func NewHttpServer(logger *zap.Logger,
 	if conf.App.Env == "prod" || conf.App.Env == "local" {
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	s.Use(gin.Logger(), recovery.Handler())
 
 	//跨域处理
 	s.Use(cors.CORSMiddleware())
