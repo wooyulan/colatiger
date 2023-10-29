@@ -27,20 +27,22 @@ func NewWire(configuration *config.Configuration, logger *zap.Logger, lumberjack
 	db := repository.NewDB(configuration, logger)
 	client := repository.NewRedis(configuration, logger)
 	sonyflake := common.NewSonyFlake()
-	repositoryRepository, cleanup, err := repository.NewRepository(logger, db, client, sonyflake)
+	minioClient := repository.NewOss(configuration, logger)
+	repositoryRepository, cleanup, err := repository.NewRepository(logger, db, client, sonyflake, minioClient)
 	if err != nil {
 		return nil, nil, err
 	}
 	userRepo := repository.NewUserRepository(logger, repositoryRepository)
-	userService := service.NewUserService(userRepo, sonyflake)
+	userService := service.NewUserService(userRepo)
 	lockBuilder := common.NewLockBuilder(client)
 	jwtRepo := repository.NewJwtRepo(repositoryRepository, logger)
 	jwtService := service.NewJwtService(configuration, logger, userService, lockBuilder, jwtRepo)
 	jwtAuth := middleware.NewJWTAuth(configuration, jwtService)
 	authHandler := handler.NewAuthHandler(logger, jwtService, userService)
 	chatHandler := handler.NewChatHandler(logger)
+	ossHandler := handler.NewOssHandler(logger, minioClient, sonyflake, configuration)
 	recovery := middleware.NewRecovery(lumberjackLogger)
-	httpServer := server.NewHttpServer(logger, configuration, cors, jwtAuth, authHandler, chatHandler, recovery)
+	httpServer := server.NewHttpServer(logger, configuration, cors, jwtAuth, authHandler, chatHandler, ossHandler, recovery)
 	app := newApp(httpServer)
 	return app, func() {
 		cleanup()
