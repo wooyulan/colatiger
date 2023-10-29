@@ -1,4 +1,4 @@
-package v1
+package req
 
 type Register struct {
 	Name            string `form:"name" json:"name" binding:"required"`

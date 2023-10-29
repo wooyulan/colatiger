@@ -14,4 +14,5 @@ type Database struct {
 	LogMode             string `mapstructure:"log_mode" json:"log_mode" yaml:"log_mode"`
 	EnableFileLogWriter bool   `mapstructure:"enable_file_log_writer" json:"enable_file_log_writer" yaml:"enable_file_log_writer"`
 	LogFilename         string `mapstructure:"log_filename" json:"log_filename" yaml:"log_filename"`
+	CreateTable         bool   `mapstructure:"create_table" json:"create_table" yaml:"create_table"`
 }

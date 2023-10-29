@@ -3,7 +3,7 @@ package chat
 import (
 	"bufio"
 	"bytes"
-	v1 "colatiger/api/v1"
+	v1 "colatiger/api/v1/req"
 	"colatiger/pkg/helper/img"
 	"encoding/json"
 	"fmt"

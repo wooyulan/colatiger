@@ -6,7 +6,9 @@ import (
 	"colatiger/pkg/helper/path"
 	"context"
 	"fmt"
-	"github.com/jassue/gin-wire/app/service"
+	"github.com/google/wire"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
 	"github.com/sony/sonyflake"
 	"go.uber.org/zap"
@@ -23,13 +25,23 @@ import (
 	"time"
 )
 
+var ProviderSet = wire.NewSet(
+	NewRedis,
+	NewDB,
+	NewOss,
+	NewRepository,
+	NewUserRepository,
+	NewJwtRepo,
+)
+
 type Repository struct {
 	db  *gorm.DB
 	rdb *redis.Client
 	sf  *sonyflake.Sonyflake
+	oss *minio.Client
 }
 
-func NewRepository(logger *zap.Logger, db *gorm.DB, rdb *redis.Client, sf *sonyflake.Sonyflake) (*Repository, func(), error) {
+func NewRepository(logger *zap.Logger, db *gorm.DB, rdb *redis.Client, sf *sonyflake.Sonyflake, oss *minio.Client) (*Repository, func(), error) {
 	cleanup := func() {
 		logger.Info("closing the data resources")
 	}
@@ -37,6 +49,7 @@ func NewRepository(logger *zap.Logger, db *gorm.DB, rdb *redis.Client, sf *sonyf
 		db:  db,
 		rdb: rdb,
 		sf:  sf,
+		oss: oss,
 	}, cleanup, nil
 }
 
@@ -114,6 +127,13 @@ func NewDB(conf *config.Configuration, gLog *zap.Logger) *gorm.DB {
 		sqlDB, _ := db.DB()
 		sqlDB.SetMaxIdleConns(conf.Database.MaxIdleConns)
 		sqlDB.SetMaxOpenConns(conf.Database.MaxOpenConns)
+
+		if conf.Database.CreateTable {
+			gLog.Info("init table start...")
+			initMySqlTables(db)
+			gLog.Info("init table end!")
+		}
+
 		return db
 	}
 }
@@ -133,26 +153,16 @@ func NewRedis(c *config.Configuration, gLog *zap.Logger) *redis.Client {
 	return client
 }
 
-type contextTxKey struct{}
-
-func (d *Repository) ExecTx(ctx context.Context, fn func(ctx context.Context) error) error {
-	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		ctx = context.WithValue(ctx, contextTxKey{}, tx)
-		return fn(ctx)
+func NewOss(c *config.Configuration, gLog *zap.Logger) *minio.Client {
+	minioClient, err := minio.New(c.Oss.Endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(c.Oss.AccessKey, c.Oss.SecretAccessKey, ""),
+		Secure: c.Oss.UseSSL,
 	})
-}
-
-func (d *Repository) DB(ctx context.Context) *gorm.DB {
-	tx, ok := ctx.Value(contextTxKey{}).(*gorm.DB)
-	if ok {
-		return tx
+	if err != nil {
+		gLog.Fatal("minio connect failed, err:", zap.Any("err", err))
+		panic("failed to connect minio")
 	}
-	return d.db
-}
-
-// NewTransaction .
-func NewTransaction(d *Repository) service.Transaction {
-	return d
+	return minioClient
 }
 
 // 数据库表初始化

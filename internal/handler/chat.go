@@ -2,7 +2,7 @@ package handler
 
 import (
 	"colatiger/api/response"
-	"colatiger/api/v1"
+	"colatiger/api/v1/req"
 	"colatiger/pkg/chat"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -20,9 +20,9 @@ type ChatHandler struct {
 
 // 对话接口流
 func (c *ChatHandler) ChatStream(ctx *gin.Context) {
-	var form v1.ChatReq
+	var form req.ChatReq
 	if err := ctx.ShouldBindJSON(&form); err != nil {
-		response.FailByErr(ctx, v1.GetErrorMsg(form, err))
+		response.FailByErr(ctx, req.GetErrorMsg(form, err))
 		return
 	}
 	chat.BuildLLaVaModelBody(ctx, form)

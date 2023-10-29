@@ -23,6 +23,11 @@ func NewUserRepository(log *zap.Logger, repo *Repository) service.UserRepo {
 
 // Create 创建用户
 func (r *userRepository) Create(ctx context.Context, user *model.User) error {
+	id, err := r.repo.sf.NextID()
+	if err != nil {
+		return err
+	}
+	user.Id = id
 	if err := r.repo.db.Create(user).Error; err != nil {
 		return errors.Wrap(err, "failed to create user")
 	}
