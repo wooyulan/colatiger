@@ -7,6 +7,7 @@ import (
 	"colatiger/config"
 	"github.com/gin-gonic/gin"
 	"github.com/jassue/gin-wire/app/pkg/request"
+	progress "github.com/markity/minio-progress"
 	"github.com/minio/minio-go/v7"
 	"github.com/sony/sonyflake"
 	"go.uber.org/zap"
@@ -58,7 +59,10 @@ func (o *OssHandler) Upload(ctx *gin.Context) {
 		id, _ := o.sf.NextID()
 		name := strconv.FormatUint(id, 10) + path.Ext(obj.Filename)
 		objectName := time.Now().Format("20060102") + "/" + name
-		result, err := o.client.PutObject(ctx, o.conf.Oss.BucketName, objectName, file, -1, minio.PutObjectOptions{ContentType: "application/octet-stream"})
+
+		// 创建进度条对象, 需要在参数中输入文件的大小
+		progressBar := progress.NewUploadProgress(obj.Size)
+		result, err := o.client.PutObject(ctx, o.conf.Oss.BucketName, objectName, file, -1, minio.PutObjectOptions{ContentType: "application/octet-stream", Progress: progressBar})
 
 		if err != nil {
 			failList = append(failList, res.OssFail{
