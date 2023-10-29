@@ -42,5 +42,7 @@ log:
   filename: 'app.log'
   max_backups: 3
   max_size: 500
-  max_age: 28
+  max_age: 1
   compress: true
+  show_line: true
+  log_in_console: true

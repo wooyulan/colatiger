@@ -21,7 +21,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	logger.Info("server start", zap.String("host", config.App.AppUrl+strconv.Itoa(config.App.Port)))
+	logger.Info("server start", zap.String("host", config.App.AppUrl+":"+strconv.Itoa(config.App.Port)))
 	if err = app.Run(context.Background()); err != nil {
 		panic(err)
 	}

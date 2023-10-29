@@ -29,7 +29,7 @@ func NewHttpServer(logger *zap.Logger,
 		http.WithServerPort(conf.App.Port),
 	)
 
-	if conf.App.Env == "prod" {
+	if conf.App.Env == "prod" || conf.App.Env == "local" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

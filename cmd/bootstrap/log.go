@@ -67,7 +67,27 @@ func NewLog(conf *config.Configuration) *zap.Logger {
 		Compress:   conf.Log.Compress,
 	}
 
-	return zap.New(
-		zapcore.NewCore(zapcore.NewJSONEncoder(encoderConfig),
-			zapcore.AddSync(loggerWriter), level), options...)
+	var syncer zapcore.WriteSyncer
+	// 判断是否控制台输出日志
+	if conf.Log.LogInConsole {
+		syncer = zapcore.NewMultiWriteSyncer(zapcore.AddSync(os.Stdout), zapcore.AddSync(loggerWriter))
+	} else {
+		syncer = zapcore.AddSync(loggerWriter)
+	}
+
+	core := zapcore.NewCore(
+		zapcore.NewJSONEncoder(encoderConfig),
+		syncer,
+		level,
+	)
+
+	logger := zap.New(core)
+
+	// 判断是否显示代码行号
+	if conf.Log.ShowLine {
+		logger = logger.WithOptions(zap.AddCaller())
+	}
+
+	return logger
+
 }
