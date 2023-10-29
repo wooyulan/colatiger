@@ -14,9 +14,9 @@ func main() {
 	flag.Parse()
 
 	config := bootstrap.NewConfig(*envConf)
-	logger := bootstrap.NewLog(config)
+	logger, loggerWriter := bootstrap.NewLog(config)
 
-	app, cleanup, err := wire.NewWire(config, logger)
+	app, cleanup, err := wire.NewWire(config, logger, loggerWriter)
 	defer cleanup()
 	if err != nil {
 		panic(err)

@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func NewLog(conf *config.Configuration) *zap.Logger {
+func NewLog(conf *config.Configuration) (*zap.Logger, *lumberjack.Logger) {
 	rootPath := path.RootPath()
 
 	// 日志路径
@@ -88,6 +88,6 @@ func NewLog(conf *config.Configuration) *zap.Logger {
 		logger = logger.WithOptions(zap.AddCaller())
 	}
 
-	return logger
+	return logger, loggerWriter
 
 }

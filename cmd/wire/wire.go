@@ -26,7 +26,7 @@ func newApp(httpServer *http.Server) *server.App {
 	)
 }
 
-func NewWire(*config.Configuration, *zap.Logger) (*server.App, func(), error) {
+func NewWire(*config.Configuration, *zap.Logger, *lumberjack.Logger) (*server.App, func(), error) {
 	panic(wire.Build(
 		repository.ProviderSet,
 		service.ProviderSet,
