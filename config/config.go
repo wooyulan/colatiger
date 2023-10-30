@@ -7,4 +7,5 @@ type Configuration struct {
 	Jwt      Jwt      `mapstructure:"jwt" json:"jwt" yaml:"jwt"`
 	Redis    Redis    `mapstructure:"redis" json:"redis" yaml:"redis"`
 	Oss      Oss      `mapstructure:"oss" json:"oss" yaml:"oss"`
+	Milvus   Milvus   `mapstructure:"milvus" json:"milvus" yaml:"milvus"`
 }

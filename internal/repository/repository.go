@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/wire"
+	"github.com/milvus-io/milvus-sdk-go/v2/client"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/redis/go-redis/v9"
@@ -29,27 +30,32 @@ var ProviderSet = wire.NewSet(
 	NewRedis,
 	NewDB,
 	NewOss,
+	NewMilvus,
+
+	NewMilvusRepository,
 	NewRepository,
 	NewUserRepository,
 	NewJwtRepo,
 )
 
 type Repository struct {
-	db  *gorm.DB
-	rdb *redis.Client
-	sf  *sonyflake.Sonyflake
-	oss *minio.Client
+	db     *gorm.DB
+	rdb    *redis.Client
+	sf     *sonyflake.Sonyflake
+	oss    *minio.Client
+	milvus client.Client
 }
 
-func NewRepository(logger *zap.Logger, db *gorm.DB, rdb *redis.Client, sf *sonyflake.Sonyflake, oss *minio.Client) (*Repository, func(), error) {
+func NewRepository(logger *zap.Logger, db *gorm.DB, rdb *redis.Client, sf *sonyflake.Sonyflake, oss *minio.Client, milvus client.Client) (*Repository, func(), error) {
 	cleanup := func() {
 		logger.Info("closing the data resources")
 	}
 	return &Repository{
-		db:  db,
-		rdb: rdb,
-		sf:  sf,
-		oss: oss,
+		db:     db,
+		rdb:    rdb,
+		sf:     sf,
+		oss:    oss,
+		milvus: milvus,
 	}, cleanup, nil
 }
 
@@ -163,6 +169,19 @@ func NewOss(c *config.Configuration, gLog *zap.Logger) *minio.Client {
 		panic("failed to connect minio")
 	}
 	return minioClient
+}
+
+func NewMilvus(conf *config.Configuration, gLog *zap.Logger) client.Client {
+	c, err := client.NewClient(context.Background(), client.Config{
+		Address: conf.Milvus.Server,
+		DBName:  "dandelion",
+	})
+	if err != nil {
+		gLog.Fatal("milvus connect failed, err:", zap.Any("err", err))
+		panic("failed to connect milvus")
+	}
+	defer c.Close()
+	return c
 }
 
 // 数据库表初始化
