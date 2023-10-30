@@ -36,7 +36,6 @@ func NewHttpServer(logger *zap.Logger,
 	}
 
 	s.Use(gin.Logger(), recovery.Handler())
-
 	//跨域处理
 	s.Use(cors.CORSMiddleware())
 
@@ -56,6 +55,7 @@ func NewHttpServer(logger *zap.Logger,
 	chatRouter := v1
 	{
 		chatRouter.POST("/chat/stream", middleware.HeadersMiddleware(), chatHandler.ChatStream)
+		chatRouter.GET("/milvus", chatHandler.Test)
 	}
 
 	// Non-strict permission routing group

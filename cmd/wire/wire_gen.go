@@ -28,7 +28,8 @@ func NewWire(configuration *config.Configuration, logger *zap.Logger, lumberjack
 	client := repository.NewRedis(configuration, logger)
 	sonyflake := common.NewSonyFlake()
 	minioClient := repository.NewOss(configuration, logger)
-	repositoryRepository, cleanup, err := repository.NewRepository(logger, db, client, sonyflake, minioClient)
+	clientClient := repository.NewMilvus(configuration, logger)
+	repositoryRepository, cleanup, err := repository.NewRepository(logger, db, client, sonyflake, minioClient, clientClient)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -39,7 +40,9 @@ func NewWire(configuration *config.Configuration, logger *zap.Logger, lumberjack
 	jwtService := service.NewJwtService(configuration, logger, userService, lockBuilder, jwtRepo)
 	jwtAuth := middleware.NewJWTAuth(configuration, jwtService)
 	authHandler := handler.NewAuthHandler(logger, jwtService, userService)
-	chatHandler := handler.NewChatHandler(logger)
+	milvusRepo := repository.NewMilvusRepository(repositoryRepository, logger)
+	milvusService := service.NewMilvusService(milvusRepo)
+	chatHandler := handler.NewChatHandler(logger, milvusService)
 	ossHandler := handler.NewOssHandler(logger, minioClient, sonyflake, configuration)
 	recovery := middleware.NewRecovery(lumberjackLogger)
 	httpServer := server.NewHttpServer(logger, configuration, cors, jwtAuth, authHandler, chatHandler, ossHandler, recovery)
