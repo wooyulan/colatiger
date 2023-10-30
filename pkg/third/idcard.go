@@ -1,4 +1,4 @@
-package main
+package third
 
 /**
  *身份证识别 WebAPI 接口调用示例 接口文档（必看）：https://doc.xfyun.cn/rest_api/%E8%BA%AB%E4%BB%BD%E8%AF%81%E8%AF%86%E5%88%AB.html
@@ -9,26 +9,36 @@ package main
  *OCR错误码400开头请在接口文档底部查看
  */
 import (
+	"colatiger/pkg/helper/img"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	jsonvalue "github.com/Andrew-M-C/go.jsonvalue"
+	"github.com/valyala/fasthttp"
 	"io"
-	"net/http"
 	"net/url"
-	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
-func ocr_idcard() {
-	// 应用APPID(必须为webapi类型应用，并开通身份证识别服务，参考帖子如何创建一个webapi应用：http://bbs.xfyun.cn/forum.php?mod=viewthread&tid=36481)
-	appid := "04ada1cb"
-	// 接口密钥(webapi类型应用开通身份证识别服务后,控制台--我的应用---身份证识别---相应服务的apikey)
-	apikey := "31952d61759f8c907676672cfbd15800"
-	curtime := strconv.FormatInt(time.Now().Unix(), 10)
+const (
+	appid  = "04ada1cb"
+	apikey = "31952d61759f8c907676672cfbd15800"
+)
 
+type OCR struct {
+	client *fasthttp.Client
+}
+
+func NewOCR(client *fasthttp.Client) *OCR {
+	return &OCR{
+		client: client,
+	}
+}
+
+func (m *OCR) OCR_IDCard(imgUrl string) {
+	curtime := strconv.FormatInt(time.Now().Unix(), 10)
 	param := make(map[string]string)
 	// 引擎类型930820
 	param["engine_type"] = "idcard"
@@ -36,32 +46,45 @@ func ocr_idcard() {
 	param["head_portrait"] = "0"
 	tmp, _ := json.Marshal(param)
 	base64_param := base64.StdEncoding.EncodeToString(tmp)
-
 	w := md5.New()
 	io.WriteString(w, apikey+curtime+base64_param)
 	checksum := fmt.Sprintf("%x", w.Sum(nil))
 	// 上传图片地址
-	f, _ := os.ReadFile("/Users/eric/Desktop/2.jpg")
-	f_base64 := base64.StdEncoding.EncodeToString(f)
+	//f, _ := os.ReadFile("/Users/eric/Desktop/2.jpg")
+	//f_base64 := base64.StdEncoding.EncodeToString(f)
+
+	f_base64, err := img.GetUrlImgBase64(imgUrl)
 	data := url.Values{}
+
 	data.Add("image", f_base64)
 	body := data.Encode()
-	client := &http.Client{}
-	// 身份证识别webapi接口地址
-	req, _ := http.NewRequest("POST", "https://webapi.xfyun.cn/v1/service/v1/ocr/idcard", strings.NewReader(body))
+	req := fasthttp.AcquireRequest()
+	defer fasthttp.ReleaseRequest(req) // 用完需要释放资源
+
 	// 组装http请求头
 	req.Header.Set("X-Appid", appid)
 	req.Header.Set("X-CurTime", curtime)
 	req.Header.Set("X-Param", base64_param)
 	req.Header.Set("X-CheckSum", checksum)
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.SetContentType("application/x-www-form-urlencoded")
+	req.SetRequestURI("https://webapi.xfyun.cn/v1/service/v1/ocr/idcard")
+	req.Header.SetMethod("POST")
+	req.SetBodyString(body)
 
-	res, _ := client.Do(req)
-	defer res.Body.Close()
-	res_body, _ := io.ReadAll(res.Body)
-	fmt.Print(string(res_body))
-}
+	resp := fasthttp.AcquireResponse()
+	defer fasthttp.ReleaseResponse(resp) // 用完需要释放资源
+	if err := m.client.Do(req, resp); err != nil {
+		fmt.Println("请求失败:", err.Error())
+		return
+	}
 
-func main() {
-	ocr_idcard()
+	j, err := jsonvalue.Unmarshal(resp.Body())
+	if err != nil {
+		return
+	}
+	str, err := j.GetObject("data")
+	if err != nil {
+		return
+	}
+	fmt.Println(str)
 }
