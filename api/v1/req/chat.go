@@ -6,4 +6,5 @@ type ChatReq struct {
 	Temperature  float64  `form:"temperature" json:"temperature"`
 	Stop         string   `form:"stop" json:"stop"`
 	Images       []string `form:"images" json:"images"`
+	Prompt       string   `form:"prompt" json:"prompt"`
 }

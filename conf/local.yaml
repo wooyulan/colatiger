@@ -31,17 +31,21 @@ database:
 
 redis:
   host: '127.0.0.1'
-  port: 6379
+  port: 6380
   db: 0
   password: ''
 
 oss:
+#  endpoint: '127.0.0.1:9000'
+#  access_key: 'colatiger'
+#  secret_access_key: 'colatiger'
+#  bucket_name: 'cola-tiger'
+#  use_ssl: false
   endpoint: '127.0.0.1:9000'
-  access_key: 'colatiger'
-  secret_access_key: 'colatiger'
+  access_key: 'minioadmin'
+  secret_access_key: 'minioadmin'
   bucket_name: 'cola-tiger'
   use_ssl: false
-
 
 
 log:

@@ -52,16 +52,16 @@ func NewHttpServer(logger *zap.Logger,
 		noAuthRouter.POST("/upload", ossHandler.Upload)
 	}
 
-	// Non-strict permission routing group
-	authRouter := v1.Use(jwtAuth.Handler(model.AppGuardName))
-	{
-		authRouter.GET("/user/info", authHandler.GetInfo)
-	}
-
 	// 对话
 	chatRouter := v1
 	{
 		chatRouter.POST("/chat/stream", middleware.HeadersMiddleware(), chatHandler.ChatStream)
+	}
+
+	// Non-strict permission routing group
+	authRouter := v1.Use(jwtAuth.Handler(model.AppGuardName))
+	{
+		authRouter.GET("/user/info", authHandler.GetInfo)
 	}
 
 	return s
