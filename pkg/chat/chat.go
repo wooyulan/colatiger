@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	v1 "colatiger/api/v1/req"
+	"colatiger/internal/model"
 	"colatiger/pkg/helper/img"
 	"encoding/json"
 	"fmt"
@@ -28,8 +29,7 @@ type MessageResponse struct {
 	ErrorCode int    `json:"error_code"`
 }
 
-func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) {
-
+func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) string {
 	jsonBytes, err := json.Marshal(llavaReq)
 	if err != nil {
 	}
@@ -45,7 +45,7 @@ func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) {
 		log.Fatal(err)
 	}
 	defer resp.Body.Close()
-
+	var assistant bytes.Buffer
 	for {
 		reader := bufio.NewReader(resp.Body)
 		rawLine, readErr := reader.ReadBytes(0)
@@ -69,16 +69,20 @@ func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) {
 		if m.ErrorCode == 0 {
 			text := strings.Split(m.Text, llavaReq.Prompt)[1]
 			llavaReq.Prompt = llavaReq.Prompt + text
+			assistant.WriteString(text)
 			textTemp, _ := json.Marshal(text)
 			var data = "data: " + string(textTemp) + "\n\n"
 			fmt.Fprintf(ctx.Writer, data)
 			ctx.Writer.Flush()
 		}
 	}
+	return assistant.String()
 }
 
-func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq) {
-	prompt := "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions. USER: %s ASSISTANT:"
+func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq, his *[]model.Chat) string {
+	prompt := BuildHisMessage(his)
+	println(prompt)
+	println("-----------")
 	body := LLaVaChatReq{
 		Model:        "llava-v1.5-13b",
 		Prompt:       prompt,
@@ -100,6 +104,31 @@ func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq) {
 	} else {
 		body.Prompt = fmt.Sprintf(prompt, chatReq.Message)
 	}
+	println(body.Prompt)
+	assistantRes := SendMsg(ctx, body)
+	return assistantRes
+}
 
-	SendMsg(ctx, body)
+func BuildHisMessage(his *[]model.Chat) string {
+	prompt := "A chat between a curious human and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the human's questions. "
+	hisPrompt := ""
+	template := "USER: %s ASSISTANT:%s </s>"
+
+	for _, msg := range *his {
+		if ok := msg.File != ""; ok {
+			baseImg := make([]string, len(msg.File))
+			for i, imgUrl := range strings.Split(msg.File, ",") {
+				base64, _ := img.GetUrlImgBase64(imgUrl)
+				baseImg[i] = base64
+			}
+			hisPrompt += fmt.Sprintf(template, "<image>\\n"+msg.Question, msg.Answer)
+		}
+		if "" != msg.Answer {
+			println(fmt.Sprintf(template, msg.Question, msg.Answer))
+
+			hisPrompt += fmt.Sprintf(template, msg.Question, msg.Answer)
+		}
+
+	}
+	return prompt + hisPrompt + "USER: %s ASSISTANT: "
 }

@@ -4,21 +4,22 @@ import (
 	"colatiger/api/response"
 	"colatiger/api/v1/req"
 	"colatiger/internal/service"
-	"colatiger/pkg/chat"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-func NewChatHandler(log *zap.Logger, milvusS *service.MilvusService) *ChatHandler {
+func NewChatHandler(log *zap.Logger, milvusS *service.MilvusService, chatS *service.ChatService) *ChatHandler {
 	return &ChatHandler{
 		log:     log,
 		milvusS: milvusS,
+		chatS:   chatS,
 	}
 }
 
 type ChatHandler struct {
 	log     *zap.Logger
 	milvusS *service.MilvusService
+	chatS   *service.ChatService
 }
 
 // 对话接口流
@@ -28,9 +29,7 @@ func (c *ChatHandler) ChatStream(ctx *gin.Context) {
 		response.FailByErr(ctx, req.GetErrorMsg(form, err))
 		return
 	}
-	chat.BuildLLaVaModelBody(ctx, form)
-	ctx.Writer.WriteString("data: [DONE]\n\n")
-
+	c.chatS.SyncChatMessage(ctx, form)
 }
 
 func (c *ChatHandler) Test(ctx *gin.Context) {

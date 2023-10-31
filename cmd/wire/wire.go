@@ -12,7 +12,6 @@ import (
 	"colatiger/internal/service"
 	"colatiger/pkg/common"
 	"colatiger/pkg/server/http"
-	"colatiger/pkg/third"
 	"github.com/google/wire"
 	"go.uber.org/zap"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -35,7 +34,6 @@ func NewWire(*config.Configuration, *zap.Logger, *lumberjack.Logger) (*server.Ap
 		handler.ProviderSet,
 		middleware.ProviderSet,
 		common.ProviderSet,
-		third.ProviderSet,
 		serverSet,
 		newApp,
 	))
