@@ -81,8 +81,6 @@ func SendMsg(ctx *gin.Context, llavaReq LLaVaChatReq) string {
 
 func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq, his *[]model.Chat) string {
 	prompt := BuildHisMessage(his)
-	println(prompt)
-	println("-----------")
 	body := LLaVaChatReq{
 		Model:        "llava-v1.5-13b",
 		Prompt:       prompt,
@@ -104,7 +102,6 @@ func BuildLLaVaModelBody(ctx *gin.Context, chatReq v1.ChatReq, his *[]model.Chat
 	} else {
 		body.Prompt = fmt.Sprintf(prompt, chatReq.Message)
 	}
-	println(body.Prompt)
 	assistantRes := SendMsg(ctx, body)
 	return assistantRes
 }
@@ -124,8 +121,6 @@ func BuildHisMessage(his *[]model.Chat) string {
 			hisPrompt += fmt.Sprintf(template, "<image>\\n"+msg.Question, msg.Answer)
 		}
 		if "" != msg.Answer {
-			println(fmt.Sprintf(template, msg.Question, msg.Answer))
-
 			hisPrompt += fmt.Sprintf(template, msg.Question, msg.Answer)
 		}
 
