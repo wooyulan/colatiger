@@ -22,3 +22,13 @@ func IntToBase62(n int) string {
 
 	return string(result)
 }
+
+func SliceRemoveStr(s []string, str string) []string {
+	var arr []string
+	for _, v := range s {
+		if v != str {
+			arr = append(arr, v)
+		}
+	}
+	return arr
+}

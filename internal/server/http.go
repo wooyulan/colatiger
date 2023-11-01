@@ -44,24 +44,39 @@ func NewHttpServer(logger *zap.Logger,
 	})
 
 	v1 := s.Group("/api/v1")
+
+	// 登录 注册
 	noAuthRouter := v1
 	{
 		noAuthRouter.POST("/auth/register", authHandler.Register)
 		noAuthRouter.POST("/auth/login", authHandler.Login)
-		noAuthRouter.POST("/upload", ossHandler.Upload)
+
+	}
+
+	// 文件管理
+	fileRouter := v1
+	{
+		fileRouter.POST("/upload", ossHandler.Upload)
 	}
 
 	// 对话
-	chatRouter := v1
+	chatRouter := v1.Use()
 	{
+		// 流对话
 		chatRouter.POST("/chat/stream", middleware.HeadersMiddleware(), chatHandler.ChatStream)
+		// 查看历史记录
+		chatRouter.POST("/chat/history", chatHandler.FindChatHis)
+		// 删除历史记录
+		chatRouter.POST("/chat/del", chatHandler.DelChatHis)
+		// 测试使用
 		chatRouter.GET("/milvus", chatHandler.Test)
 	}
 
-	// Non-strict permission routing group
-	authRouter := v1.Use(jwtAuth.Handler(model.AppGuardName))
+	// 用户相关
+	userRouter := v1.Use(jwtAuth.Handler(model.AppGuardName))
 	{
-		authRouter.GET("/user/info", authHandler.GetInfo)
+		// 获取当前用户
+		userRouter.GET("/user/info", authHandler.GetInfo)
 	}
 
 	return s

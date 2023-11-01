@@ -13,6 +13,7 @@ import (
 type ChatRepo interface {
 	SaveMessage(ctx context.Context, his *model.Chat) error
 	FindByHis(ctx *gin.Context) (data *[]model.Chat, err error)
+	DelChatHisByChatIdAndUserId(assistant string, user string)
 }
 
 type ChatService struct {
@@ -27,7 +28,7 @@ func NewChatService(repo ChatRepo) *ChatService {
 
 func (c *ChatService) SyncChatMessage(ctx *gin.Context, req v1.ChatReq) error {
 	// 构建对话历史记录
-	data, _ := c.findHistory(ctx)
+	data, _ := c.FindHistory(ctx)
 
 	assistantRes := chat.BuildLLaVaModelBody(ctx, req, data)
 
@@ -51,8 +52,12 @@ func (c *ChatService) SyncChatMessage(ctx *gin.Context, req v1.ChatReq) error {
 }
 
 // 查询对话聊天记录
-func (c *ChatService) findHistory(ctx *gin.Context) (*[]model.Chat, error) {
+func (c *ChatService) FindHistory(ctx *gin.Context) (*[]model.Chat, error) {
 	data, err := c.chatRepo.FindByHis(ctx)
 	return data, err
 
+}
+
+func (c *ChatService) DelChatHisByChatAndUserId(assistant string, userId string) {
+	c.chatRepo.DelChatHisByChatIdAndUserId(assistant, userId)
 }
