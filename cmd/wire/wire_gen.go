@@ -47,7 +47,10 @@ func NewWire(configuration *config.Configuration, logger *zap.Logger, lumberjack
 	chatHandler := handler.NewChatHandler(logger, milvusService, chatService)
 	ossHandler := handler.NewOssHandler(logger, minioClient, sonyflake, configuration)
 	recovery := middleware.NewRecovery(lumberjackLogger)
-	httpServer := server.NewHttpServer(logger, configuration, cors, jwtAuth, authHandler, chatHandler, ossHandler, recovery)
+	ocrRepo := repository.NewOcrRepository(logger, repositoryRepository)
+	ocrService := service.NewOcrService(ocrRepo)
+	ocrHandler := handler.NewOcrHandler(ocrService)
+	httpServer := server.NewHttpServer(logger, configuration, cors, jwtAuth, authHandler, chatHandler, ossHandler, recovery, ocrHandler)
 	app := newApp(httpServer)
 	return app, func() {
 		cleanup()

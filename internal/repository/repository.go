@@ -37,6 +37,7 @@ var ProviderSet = wire.NewSet(
 	NewUserRepository,
 	NewJwtRepo,
 	NewChatRepository,
+	NewOcrRepository,
 )
 
 type Repository struct {
@@ -191,6 +192,7 @@ func initMySqlTables(db *gorm.DB) {
 	err := db.AutoMigrate(
 		model.User{},
 		model.Chat{},
+		model.Ocr{},
 	)
 	if err != nil {
 		log.Printf("migrate table failed err:%v", zap.Any("err", err))

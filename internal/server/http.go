@@ -19,6 +19,7 @@ func NewHttpServer(logger *zap.Logger,
 	chatHandler *handler.ChatHandler,
 	ossHandler *handler.OssHandler,
 	recovery *middleware.Recovery,
+	ocrHandler *handler.OcrHandler,
 ) *http.Server {
 
 	// 初始化验证器
@@ -67,6 +68,12 @@ func NewHttpServer(logger *zap.Logger,
 		chatRouter.POST("/chat/history/del", chatHandler.DelChatHis)
 		// 测试使用
 		chatRouter.GET("/milvus", chatHandler.Test)
+	}
+
+	// ocr
+	ocrRouter := v1.Use()
+	{
+		ocrRouter.POST("/ocr", ocrHandler.OcrTextFromFile)
 	}
 
 	// 用户相关
