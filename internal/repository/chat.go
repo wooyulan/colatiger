@@ -45,5 +45,7 @@ func (c chatRepository) FindByHis(ctx *gin.Context) (data *[]model.Chat, err err
 }
 
 func (c chatRepository) DelChatHisByChatIdAndUserId(assistant string, user string) {
-	c.repo.db.Delete(model.Chat{})
+	if err := c.repo.db.Where("1 = 1").Delete(&model.Chat{}).Error; err != nil {
+		fmt.Printf(err.Error())
+	}
 }

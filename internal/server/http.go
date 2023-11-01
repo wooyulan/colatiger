@@ -50,15 +50,12 @@ func NewHttpServer(logger *zap.Logger,
 	{
 		noAuthRouter.POST("/auth/register", authHandler.Register)
 		noAuthRouter.POST("/auth/login", authHandler.Login)
-
 	}
-
 	// 文件管理
 	fileRouter := v1
 	{
 		fileRouter.POST("/upload", ossHandler.Upload)
 	}
-
 	// 对话
 	chatRouter := v1.Use()
 	{
@@ -67,7 +64,7 @@ func NewHttpServer(logger *zap.Logger,
 		// 查看历史记录
 		chatRouter.POST("/chat/history", chatHandler.FindChatHis)
 		// 删除历史记录
-		chatRouter.POST("/chat/del", chatHandler.DelChatHis)
+		chatRouter.POST("/chat/history/del", chatHandler.DelChatHis)
 		// 测试使用
 		chatRouter.GET("/milvus", chatHandler.Test)
 	}

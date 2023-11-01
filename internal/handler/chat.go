@@ -47,7 +47,8 @@ func (c *ChatHandler) FindChatHis(ctx *gin.Context) {
 
 // 删除 对话记录
 func (c *ChatHandler) DelChatHis(ctx *gin.Context) {
-	userId := ctx.Keys["id"].(string)
+	//userId := ctx.Keys["id"].(string
+	userId := ""
 	assistant := ""
 	c.chatS.DelChatHisByChatAndUserId(assistant, userId)
 	response.Success(ctx, nil)
