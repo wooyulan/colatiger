@@ -23,8 +23,11 @@ func NewOcrService(ocrRepo OcrRepo) *OcrService {
 	}
 }
 
-func (ocr *OcrService) OcrTextForFile(ctx *gin.Context, req v1.OcrReq) (v interface{}, err error) {
+func (ocr *OcrService) FindRecord() {
 
+}
+
+func (ocr *OcrService) OcrTextForFile(ctx *gin.Context, req v1.OcrReq) (v interface{}, err error) {
 	switch req.FileType {
 	// 识别身份证证件
 	case "idCard":
@@ -35,8 +38,8 @@ func (ocr *OcrService) OcrTextForFile(ctx *gin.Context, req v1.OcrReq) (v interf
 	}
 }
 
+// IdCard 身份证识别
 func (ocr *OcrService) IdCard(ctx *gin.Context, req v1.OcrReq) (v interface{}, err error) {
-
 	data, err := strategy.NewOcr(req.ImgUrl, &strategy.IDCard{}).Ocr()
 	if err != nil {
 		return nil, err

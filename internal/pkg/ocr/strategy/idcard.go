@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	appid       = ""
-	apikey      = ""
+	appid       = "04ada1cb"
+	apikey      = "31952d61759f8c907676672cfbd15800"
 	reqUrl      = "https://webapi.xfyun.cn/v1/service/v1/ocr/idcard"
 	contentType = "application/x-www-form-urlencoded"
 )

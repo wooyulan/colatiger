@@ -71,9 +71,10 @@ func NewHttpServer(logger *zap.Logger,
 	}
 
 	// ocr
-	ocrRouter := v1.Use()
+	imgRouter := v1.Use()
 	{
-		ocrRouter.POST("/ocr", ocrHandler.OcrTextFromFile)
+		imgRouter.POST("/ocr", ocrHandler.OcrTextFromFile)
+		imgRouter.POST("/img/classification", ocrHandler.ImgClassification)
 	}
 
 	// 用户相关
