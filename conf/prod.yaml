@@ -1,0 +1,62 @@
+app:
+  env: 'prod'
+  port: 8000
+  app_name: 'colatiger'
+  app_url: '0.0.0.0'
+
+jwt:
+  secret: '3Bde3BGEbYqtqyEUzW3ry8jKFcaPH17fRmTmqE7MDr05Lwj95uruRKrrkb44TJ4s'
+  jwt_ttl: 43200
+  jwt_blacklist_grace_period: 10
+  refresh_grace_period: 1800
+
+database:
+  driver: 'mysql'
+  host: '127.0.0.1'
+  port: 3308
+  database: 'cola_tiger'
+  table_prefix: ''
+  username: 'root'
+  password: 'Abcd1234'
+  charset: 'utf8mb4'
+  max_idle_conns: 10
+  max_open_conns: 100
+  log_mode: 'debug'
+  enable_file_log_writer: true
+  log_filename: 'sql.log'
+  create_table: true
+
+redis:
+  host: '127.0.0.1'
+  port: 6380
+  db: 0
+  password: ''
+
+oss:
+#  endpoint: '127.0.0.1:9000'
+#  access_key: 'colatiger'
+#  secret_access_key: 'colatiger'
+#  bucket_name: 'cola-tiger'
+#  use_ssl: false
+  endpoint: '127.0.0.1:9000'
+  access_key: 'minioadmin'
+  secret_access_key: 'minioadmin'
+  bucket_name: 'cola-tiger'
+  use_ssl: false
+
+
+milvus:
+  server: 127.0.0.1:19530
+
+
+
+log:
+  level: 'info'
+  root_dir: 'storage/logs'
+  filename: 'app.log'
+  max_backups: 3
+  max_size: 500
+  max_age: 1
+  compress: true
+  show_line: true
+  log_in_console: true

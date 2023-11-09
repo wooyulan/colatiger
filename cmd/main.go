@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	var envConf = flag.String("conf", "./conf/local.yaml", "conf path, eg: -conf ./conf/local.yaml")
+	var envConf = flag.String("conf", "../conf/local.yaml", "conf path, eg: -conf ./conf/local.yaml")
 	flag.Parse()
 
 	config := bootstrap.NewConfig(*envConf)

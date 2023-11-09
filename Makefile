@@ -2,6 +2,8 @@ GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
 APP_MAIN_DIR=cmd
 
+
+
 .PHONY: run
 # run
 run:
@@ -23,6 +25,12 @@ generate:
 # wire
 wire:
 	cd $(APP_MAIN_DIR)/wire && wire
+
+.PHONY: docker
+docker:
+	docker build -f deploy/build/Dockerfile -t ts-poc/caixun:"$(VERSION)" .
+
+
 
 # show help
 help:
