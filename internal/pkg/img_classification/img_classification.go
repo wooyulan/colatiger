@@ -5,7 +5,7 @@ import (
 	"colatiger/pkg/common"
 )
 
-const imgUrl = "http://localhost:5050/open/v1/img"
+const imgUrl = "http://vgg:5050/open/v1/img"
 
 type ImgClassification struct {
 	ImgUrl  string `json:"img_url"`
