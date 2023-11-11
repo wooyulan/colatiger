@@ -12,7 +12,7 @@ run:
 .PHONY: build
 # 自动根据平台编译二进制文件
 build:
-	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+	mkdir -p colatiger/ && CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.Version=$(VERSION)" -o colatiger .
 
 .PHONY: generate
 # 生成应用所需的文件
@@ -28,7 +28,7 @@ wire:
 
 .PHONY: docker
 docker:
-	docker build -f deploy/build/Dockerfile -t ts-poc/caixun:"$(VERSION)" .
+	docker build -f Dockerfile -t ts-poc/caixun:"$(VERSION)" .
 
 
 

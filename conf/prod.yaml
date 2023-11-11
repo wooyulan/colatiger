@@ -1,7 +1,7 @@
 app:
-  env: 'local'
+  env: 'prod'
   port: 8000
-  app_name: 'colatiger'
+  app_name: 'caixun'
   app_url: '0.0.0.0'
 
 jwt:
@@ -12,12 +12,12 @@ jwt:
 
 database:
   driver: 'mysql'
-  host: '127.0.0.1'
-  port: 3308
-  database: 'cola_tiger'
+  host: '192.168.87.185'
+  port: 3306
+  database: 'caixun'
   table_prefix: ''
-  username: 'root'
-  password: 'Abcd1234'
+  username: 'thundersoft'
+  password: 'thundersoft'
   charset: 'utf8mb4'
   max_idle_conns: 10
   max_open_conns: 100
@@ -27,23 +27,21 @@ database:
   create_table: true
 
 redis:
-  host: '127.0.0.1'
-  port: 6380
-  db: 0
-  password: ''
+  host: '192.168.87.185'
+  port: 6379
+  db: 6
+  password: '123456'
 
 oss:
-  endpoint: '127.0.0.1:9000'
-  access_key: 'minioadmin'
-  secret_access_key: 'minioadmin'
-  bucket_name: 'cola-tiger'
+  endpoint: '192.168.87.185:9000'
+  access_key: 'thundersoft'
+  secret_access_key: 'thundersoft'
+  bucket_name: 'poc'
   use_ssl: false
 
 
 milvus:
-  server: 127.0.0.1:19530
-
-
+  server: 192.168.87.216:19530
 
 log:
   level: 'info'

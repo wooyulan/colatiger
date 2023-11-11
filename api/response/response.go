@@ -2,8 +2,9 @@ package response
 
 import (
 	cErr "colatiger/api/error"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 // 响应结构体
